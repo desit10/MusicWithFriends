@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <background>
+        <shape>
+            <solid android:color="@color/green"/>
+        </shape>
+    </background>
+    <foreground android:drawable="@drawable/avd_icon_app"/>
+
+</adaptive-icon>

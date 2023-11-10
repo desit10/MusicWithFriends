@@ -1,0 +1,25 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.MusicWithFriends" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <item name="colorPrimary">@color/white</item>
+        <item name="android:windowLightStatusBar">@color/black</item>
+        <item name="android:windowActivityTransitions">true</item>
+
+    </style>
+
+    <style name="ThemeOverlay.AppTheme.TextInputEditText.Outlined" parent="" >
+        <item name="colorPrimary">@color/white</item>
+        <item name="android:colorControlActivated">@color/white</item>
+    </style>
+
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_in</item>
+        <item name="android:windowExitAnimation">@anim/slide_out</item>
+    </style>
+
+    <style name="DialogRecipeAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_in_recipe</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_recipe</item>
+    </style>
+</resources>
