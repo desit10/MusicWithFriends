@@ -33,12 +33,14 @@ android {
 dependencies {
     
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.core:core-splashscreen:1.0.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-alpha01")
     implementation("androidx.navigation:navigation-fragment:2.5.0")
     implementation("androidx.navigation:navigation-ui:2.5.0")
+
+    implementation("com.google.android.material:material:1.9.0")
+    implementation("com.google.code.gson:gson:2.8.8")
 
     implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
     implementation("com.google.firebase:firebase-database")

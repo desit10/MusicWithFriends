@@ -1,15 +1,15 @@
 package com.example.musicwithfriends.Adapters;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.MediaMetadataRetriever;
+import android.content.SharedPreferences;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,33 +18,43 @@ import androidx.media3.common.util.UnstableApi;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.musicwithfriends.Helpers.SnapHelperOneByOne;
-import com.example.musicwithfriends.Models.Song;
+import com.example.musicwithfriends.Models.Playlist;
 import com.example.musicwithfriends.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 @UnstableApi
 public class PlaylistsAdapter extends RecyclerView.Adapter<PlaylistsAdapter.ViewHolder>{
 
-    Context context;
+    public static final String APP_PREFERENCES = "mysettings";
+    private SharedPreferences mSettings;
+    private SharedPreferences.Editor editor;
     FragmentActivity mainActivity;
-    ArrayList<Song> songs;
-    CurrentSongsAdapter currentSongsAdapter;
-    RecyclerView recyclerCurrentSong;
-    SnapHelperOneByOne snapHelperOneByOne;
+
+
+    Context context;
+    ArrayList<Playlist> playlists;
+    RecyclerView recyclerPlaylist, recyclerSongs;
+    View.OnClickListener onClickListener;
+    ValueAnimator anim;
+    int positionItem = 0;
     Boolean stateAdapter;
-    public PlaylistsAdapter(Context context, FragmentActivity mainActivity, ArrayList<Song> songs, Boolean stateAdapter) {
+    public PlaylistsAdapter(Context context, FragmentActivity mainActivity, ArrayList<Playlist> playlists,
+                            RecyclerView recyclerPlaylist, RecyclerView recyclerSongs, View.OnClickListener onClickListener) {
         this.context = context;
+        this.playlists = playlists;
+        this.recyclerSongs = recyclerSongs;
+        this.recyclerPlaylist = recyclerPlaylist;
         this.mainActivity = mainActivity;
-        this.songs = songs;
-        this.stateAdapter = stateAdapter;
+        this.onClickListener = onClickListener;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_song, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_playlist, parent, false);
 
         return new PlaylistsAdapter.ViewHolder(view);
     }
@@ -52,70 +62,68 @@ public class PlaylistsAdapter extends RecyclerView.Adapter<PlaylistsAdapter.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
-        Song song = songs.get(position);
+        Playlist playlist = playlists.get(position);
+        int playlistSize = playlist.getSongs().size();
 
-       /* if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.Q){
-            android.media.MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-            mmr.setDataSource(song.getPath());
-            byte[] data = mmr.getEmbeddedPicture();
-            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+        holder.playlistTitle.setText(playlist.getName());
 
-            if(bitmap == null){
-                holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
-            } else {
-                holder.songAlbum.setImageBitmap(bitmap);
-            }
-        } else{
-            holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
-        }*/
-
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(song.getPath());
-        byte[] data = mmr.getEmbeddedPicture();
-        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-
-        if(bitmap == null){
-            holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
-        } else {
-            holder.songAlbum.setImageBitmap(bitmap);
+        if(playlistSize == 1) {
+            holder.songCount.setText(String.valueOf(playlist.getSongs().size()) + " трек");
+        }
+        else if (playlistSize <= 4) {
+            holder.songCount.setText(String.valueOf(playlist.getSongs().size()) + " трека");
+        }
+        else {
+            holder.songCount.setText(String.valueOf(playlist.getSongs().size()) + " треков");
         }
 
-        holder.songTitle.setText(song.getTitle());
-        holder.songArtist.setText(song.getArtist());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                currentSongsAdapter.setStateSong(true);
-                recyclerCurrentSong.scrollToPosition(position);
+                /*Collections.swap(playlists, position, 0);
+                notifyItemMoved(position, 0);*/
+
+                animRecyclerPlaylist(position);
+
+                onClickListener.onClick(v);
+
+                mSettings = context.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
+
+                recyclerSongs.setLayoutManager(new LinearLayoutManager(context));
+                recyclerSongs.setAdapter(new SongsAdapter(context, mainActivity, playlist.getSongs(), mSettings.getBoolean("stateSongsAdapter", true)));
+
+                editor = mSettings.edit();
+                editor.putBoolean("stateSongsAdapter", false);
+                editor.apply();
+
+                recyclerSongs.setTranslationX(-1000f);
+                recyclerSongs.animate().translationXBy(1000f).setDuration(500).setStartDelay(250).start();
             }
         });
-
     }
 
     @Override
     public int getItemCount() {
-        return songs.size();
+        return playlists.size();
     }
 
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
+        Playlist playlist = playlists.get(0);
 
-        recyclerCurrentSong = mainActivity.findViewById(R.id.recyclerCurrentSong);
-        currentSongsAdapter = new CurrentSongsAdapter(context, recyclerCurrentSong, songs);
-        if(stateAdapter){
-            recyclerCurrentSong.setTranslationX(-1000f);
+        mSettings = context.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
 
-            recyclerCurrentSong.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+        recyclerSongs.setLayoutManager(new LinearLayoutManager(context));
+        recyclerSongs.setAdapter(new SongsAdapter(context, mainActivity, playlist.getSongs(), mSettings.getBoolean("stateSongsAdapter", true)));
 
-            recyclerCurrentSong.setOnFlingListener(null);
-            snapHelperOneByOne = new SnapHelperOneByOne();
-            snapHelperOneByOne.attachToRecyclerView(recyclerCurrentSong);
+        editor = mSettings.edit();
+        editor.putBoolean("stateSongsAdapter", false);
+        editor.apply();
 
-            recyclerCurrentSong.setAdapter(currentSongsAdapter);
+        recyclerSongs.setTranslationX(-1000f);
+        recyclerSongs.animate().translationXBy(1000f).setDuration(500).setStartDelay(250).start();
 
-            recyclerCurrentSong.animate().translationXBy(1000f).setDuration(500).start();
-        }
     }
 
     @Override
@@ -130,18 +138,54 @@ public class PlaylistsAdapter extends RecyclerView.Adapter<PlaylistsAdapter.View
         holder.setIsRecyclable(false);
     }
 
+    public int getPositionItem() {
+        return positionItem;
+    }
+
+    private void setPositionItem(int positionItem) {
+        this.positionItem = positionItem;
+    }
+
+    private void animRecyclerPlaylist(int position){
+
+        int playlistsRecyclerHeight = (int) context.getResources().getDimension(R.dimen.get_playlists_recycler_height);
+
+        anim = ValueAnimator.ofInt(recyclerPlaylist.getMeasuredHeight(), playlistsRecyclerHeight);
+
+        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(@NonNull ValueAnimator valueAnimator) {
+                int value = (Integer) valueAnimator.getAnimatedValue();
+                ViewGroup.LayoutParams layoutParams = recyclerPlaylist.getLayoutParams();
+                layoutParams.height = value;
+                recyclerPlaylist.requestLayout();
+            }
+        });
+
+        if(position != 0){
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    recyclerPlaylist.scrollToPosition(position);
+                }
+            });
+        }
+
+        setPositionItem(position);
+
+        anim.setDuration(250);
+        anim.start();
+    }
+
     public  class ViewHolder extends RecyclerView.ViewHolder{
 
-        FrameLayout frameSong;
-        ImageView songAlbum;
-        TextView songTitle, songArtist;
+        TextView playlistTitle, songCount;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            frameSong = itemView.findViewById(R.id.frameSong);
-            songAlbum = itemView.findViewById(R.id.songAlbum);
-            songTitle = itemView.findViewById(R.id.songTitle);
-            songArtist = itemView.findViewById(R.id.songArtist);
+            playlistTitle = itemView.findViewById(R.id.playlistTitle);
+            songCount = itemView.findViewById(R.id.songCount);
         }
     }
 }

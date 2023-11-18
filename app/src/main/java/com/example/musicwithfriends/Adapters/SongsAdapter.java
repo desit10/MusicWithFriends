@@ -106,6 +106,17 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                currentSongsAdapter = null;
+
+                currentSongsAdapter = new CurrentSongsAdapter(context, recyclerCurrentSong, songs);
+                recyclerCurrentSong.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+
+                recyclerCurrentSong.setOnFlingListener(null);
+                snapHelperOneByOne = new SnapHelperOneByOne();
+                snapHelperOneByOne.attachToRecyclerView(recyclerCurrentSong);
+
+                recyclerCurrentSong.setAdapter(currentSongsAdapter);
+
                 currentSongsAdapter.setStateSong(true);
                 recyclerCurrentSong.scrollToPosition(position);
             }
@@ -136,11 +147,11 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
 
             recyclerCurrentSong.setAdapter(currentSongsAdapter);
 
-            recyclerCurrentSong.animate().translationXBy(1000f).setDuration(500).start();
+            recyclerCurrentSong.animate().translationXBy(1000f).setDuration(500).setStartDelay(250).start();
         }
     }
 
-    @Override
+    /*@Override
     public void onViewRecycled(@NonNull SongsAdapter.ViewHolder holder) {
         super.onViewRecycled(holder);
         holder.setIsRecyclable(true);
@@ -150,7 +161,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
     public void onViewDetachedFromWindow(@NonNull SongsAdapter.ViewHolder holder) {
         super.onViewDetachedFromWindow(holder);
         holder.setIsRecyclable(false);
-    }
+    }*/
 
     public  class ViewHolder extends RecyclerView.ViewHolder{
 

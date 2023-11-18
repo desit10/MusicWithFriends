@@ -2,9 +2,7 @@ package com.example.musicwithfriends.Adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +10,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
@@ -22,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicwithfriends.Models.Song;
 import com.example.musicwithfriends.R;
-import com.example.musicwithfriends.SongPlayerActivity;
 
 import java.util.ArrayList;
 
@@ -118,8 +114,10 @@ public class CurrentSongsAdapter extends RecyclerView.Adapter<CurrentSongsAdapte
         holder.songManagement.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                stateSong = !stateSong;
-                if(!stateSong){
+                /*stateSong = getStateSong();
+                stateSong = !stateSong;*/
+                setStateSong(!getStateSong());
+                if(!getStateSong()){
                     holder.playerView.getPlayer().pause();
                     holder.songManagement.setImageResource(R.drawable.song_play);
                 } else {
@@ -133,12 +131,11 @@ public class CurrentSongsAdapter extends RecyclerView.Adapter<CurrentSongsAdapte
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               /* Intent intent = new Intent(context, SongPlayerActivity.class);
+               /* Intent intent = new Intent(context, SongPlay111erActivity.class);
                 intent.putExtra("INDEX", position);
                 intent.putExtra("SONGS", songs);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);*/
-                //recyclerCurrentSongs.animate().translationY(-500);
             }
         });
 
@@ -159,7 +156,7 @@ public class CurrentSongsAdapter extends RecyclerView.Adapter<CurrentSongsAdapte
     @Override
     public void onViewAttachedToWindow(@NonNull ViewHolder holder) {
         super.onViewAttachedToWindow(holder);
-        if(!stateSong){
+        if(!getStateSong()){
             holder.songManagement.setImageResource(R.drawable.song_play);
         } else {
             holder.songManagement.setImageResource(R.drawable.song_pause);
@@ -180,6 +177,10 @@ public class CurrentSongsAdapter extends RecyclerView.Adapter<CurrentSongsAdapte
 
     public void setStateSong(Boolean stateSong) {
         this.stateSong = stateSong;
+    }
+
+    public boolean getStateSong() {
+        return stateSong;
     }
 
     public  class ViewHolder extends RecyclerView.ViewHolder{
