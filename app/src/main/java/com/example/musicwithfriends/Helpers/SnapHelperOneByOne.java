@@ -1,5 +1,6 @@
 package com.example.musicwithfriends.Helpers;
 
+import android.util.Log;
 import android.view.View;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,8 +27,8 @@ public class SnapHelperOneByOne extends LinearSnapHelper {
 
         LinearLayoutManager myLayoutManager = (LinearLayoutManager) layoutManager;
 
-        int nextPosition = myLayoutManager.findFirstVisibleItemPosition();
         int oldPosition = myLayoutManager.findLastVisibleItemPosition();
+        int nextPosition = myLayoutManager.findFirstVisibleItemPosition();
 
         //Получаем позицию адаптера
         int currentPosition = layoutManager.getPosition(currentView);
@@ -47,4 +48,5 @@ public class SnapHelperOneByOne extends LinearSnapHelper {
         //Получение позиции верхнего\нижнего элемента
         return currentPosition;
     }
+
 }

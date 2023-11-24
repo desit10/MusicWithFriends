@@ -8,6 +8,7 @@
     <color name="red">#FFF16065</color>
     <color name="pink">#FFF4C6C9</color>
     <color name="cream">#FDF4E3</color>
+    <color name="blue">#2CA9BC</color>
     <color name="green">#FF274F35</color>
     <color name="transparent">@android:color/transparent</color>
 </resources>

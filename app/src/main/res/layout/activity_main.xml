@@ -40,18 +40,12 @@
         app:layout_constraintStart_toStartOf="parent"
         android:theme="@style/BottonNavigation">
 
-        <!--<androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerCurrentSong"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_gravity="center|top"/>-->
-
         <com.google.android.material.bottomappbar.BottomAppBar
             android:id="@+id/bottomAppBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:backgroundTint="@color/green"
+            android:backgroundTint="@color/blue"
             app:fabCradleMargin="10dp"
             app:fabCradleRoundedCornerRadius="50dp">
 
@@ -61,11 +55,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="20dp"
                 android:background="@color/transparent"
-                app:itemActiveIndicatorStyle="@color/orange"
+                app:itemActiveIndicatorStyle="@color/red"
                 app:itemIconSize="30dp"
                 app:itemIconTint="@drawable/bottom_nav_selector"
                 app:itemPaddingTop="15dp"
-                app:itemRippleColor="@color/orange"
+                app:itemRippleColor="@color/red"
                 app:menu="@menu/bottom_menu" />
 
         </com.google.android.material.bottomappbar.BottomAppBar>
@@ -75,10 +69,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/musics"
-            app:backgroundTint="@color/green"
+            app:backgroundTint="@color/blue"
             app:layout_anchor="@id/bottomAppBar"
             app:maxImageSize="40dp"
-            app:tint="@color/orange"/>
+            app:tint="@color/red"/>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

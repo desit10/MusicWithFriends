@@ -22,6 +22,7 @@ public class DialogHelper {
     private AnimatedVectorDrawable animatedVectorDrawable;
 
     //Обычные диалоговые окна
+
     public DialogHelper(Context context) {
         this.dialog = new Dialog(context);
     }

@@ -3,7 +3,7 @@
 
     <background>
         <shape>
-            <solid android:color="@color/green"/>
+            <solid android:color="@color/blue"/>
         </shape>
     </background>
     <foreground android:drawable="@drawable/avd_icon_app"/>

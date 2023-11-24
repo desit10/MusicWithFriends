@@ -19,8 +19,8 @@
         <item name="android:windowExitAnimation">@anim/slide_out</item>
     </style>
 
-    <style name="DialogRecipeAnimation">
-        <item name="android:windowEnterAnimation">@anim/slide_in_recipe</item>
-        <item name="android:windowExitAnimation">@anim/slide_out_recipe</item>
+    <style name="DialogPlaylistAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_in_dialog</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_dialog</item>
     </style>
 </resources>

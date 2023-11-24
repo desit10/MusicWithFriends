@@ -5,6 +5,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -14,7 +15,9 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.transition.TransitionInflater;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -89,7 +92,8 @@ import java.util.ArrayList;
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
         TransitionInflater inflater = TransitionInflater.from(requireContext());
-        setExitTransition(inflater.inflateTransition(R.transition.slide_right));
+        this.setEnterTransition(inflater.inflateTransition(R.transition.slide_left));
+        this.setExitTransition(inflater.inflateTransition(R.transition.slide_right));
     }
 
 
@@ -102,7 +106,6 @@ import java.util.ArrayList;
     LinearLayout layoutPlaylistsManagement;
     TextView textPlaylistsManagement;
     ImageButton playlistsManagement;
-    SnapHelperOneByOne snapHelperOneByOne;
     ArrayList<Song> songs;
     Boolean statePlaylistRecycler = false;
 
@@ -126,6 +129,13 @@ import java.util.ArrayList;
             return view;
         }
 
+        /*getActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .detach(this)
+                .attach(this)
+                .commit();*/
+
+
         //Вывод песен из хранилища
         showSongs();
 
@@ -141,51 +151,6 @@ import java.util.ArrayList;
                 changeRecyclerPlaylist();
             }
         });
-
-
-        /*ArrayList<Song> songs2 = new ArrayList<Song>();
-        songs2.add(songs.get(0));
-        ArrayList<Song> songs3 = new ArrayList<Song>();
-        songs3.add(songs.get(1));
-        songs3.add(songs.get(2));
-        ArrayList<Song> songs4 = new ArrayList<Song>();
-        songs4.add(songs.get(3));
-        songs4.add(songs.get(4));
-        songs4.add(songs.get(5));
-        ArrayList<Song> songs5 = new ArrayList<Song>();
-        songs5.add(songs.get(6));
-        songs5.add(songs.get(7));
-        songs5.add(songs.get(8));
-        songs5.add(songs.get(9));
-        ArrayList<Song> songs6 = new ArrayList<Song>();
-        songs6.add(songs.get(10));
-        songs6.add(songs.get(11));
-        songs6.add(songs.get(12));
-        songs6.add(songs.get(1));
-        songs6.add(songs.get(2));
-
-        Playlist playlist = new Playlist("Все треки", songs);
-        Playlist playlist2 = new Playlist("Треки2", songs2);
-        Playlist playlist3 = new Playlist("Треки3", songs3);
-        Playlist playlist4 = new Playlist("Треки4", songs4);
-        Playlist playlist5 = new Playlist("Треки5", songs5);
-        Playlist playlist6 = new Playlist("Треки6", songs6);
-
-        ArrayList<Playlist> playlists = new ArrayList<Playlist>();
-        playlists.add(playlist);
-        playlists.add(playlist2);
-        playlists.add(playlist3);
-        playlists.add(playlist4);
-        playlists.add(playlist5);
-        playlists.add(playlist6);
-
-        Gson gson = new Gson();
-        String json = gson.toJson(playlists);
-        editor = mSettings.edit();
-        editor.putString("Playlists", json);
-        editor.apply();
-
-        Log.e("Playlists", json);*/
 
         return view;
     }
@@ -203,54 +168,90 @@ import java.util.ArrayList;
     }
 
     void requestPermission(){
-
         if(ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)){
-            Toast.makeText(getContext(), "Разрешите приложению в настройках брать песни из хранилища", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Разрешите в настройках приложению доступ к файлам", Toast.LENGTH_SHORT).show();
         } else {
             ActivityCompat.requestPermissions(
                     getActivity(),
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     123);
         }
-
     }
 
     void showSongs(){
-        String[] projection = {
-                MediaStore.Audio.Media.DATA,
-                MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.ARTIST,
-                MediaStore.Audio.Media.ALBUM
-        };
 
-        String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
+        String[] projection;
 
-        Cursor cursor = getContext().getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                projection,
-                selection,
-                null,
-                null);
+        if(android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.Q){
+            projection = new String[]{
+                    MediaStore.Audio.Media._ID,
+                    MediaStore.Audio.Media.DATA,
+                    MediaStore.Audio.Media.TITLE,
+                    MediaStore.Audio.Media.ARTIST,
+                    MediaStore.Audio.Media.GENRE
+            };
 
-        while (cursor.moveToNext()){
+            String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
 
-            Song song = new Song(
-                    cursor.getString(0),
-                    cursor.getString(1),
-                    cursor.getString(2),
-                    cursor.getString(3)
-            );
+            Cursor cursor = getContext().getContentResolver().query(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    projection,
+                    selection,
+                    null,
+                    null);
 
-            if(new File(song.getPath()).exists()){
-                songs.add(song);
+            while (cursor.moveToNext()){
+
+                Song song = new Song(
+                        cursor.getString(0),
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        cursor.getString(3),
+                        cursor.getString(4)
+                );
+
+                if(new File(song.getPath()).exists()){
+                    songs.add(song);
+                }
+
             }
+        } else{
+            projection = new String[]{
+                    MediaStore.Audio.Media._ID,
+                    MediaStore.Audio.Media.DATA,
+                    MediaStore.Audio.Media.TITLE,
+                    MediaStore.Audio.Media.ARTIST
+            };
 
+            String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
+
+            Cursor cursor = getContext().getContentResolver().query(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    projection,
+                    selection,
+                    null,
+                    null);
+
+            while (cursor.moveToNext()){
+
+                Song song = new Song(
+                        cursor.getString(0),
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        cursor.getString(3),
+                        ""
+                );
+
+                if(new File(song.getPath()).exists()){
+                    songs.add(song);
+                }
+
+            }
         }
 
         if(songs.size() == 0){
             Toast.makeText(getContext(), "Cписок музыки пуст", Toast.LENGTH_SHORT).show();
         } else {
-
             View.OnClickListener onClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -258,15 +259,37 @@ import java.util.ArrayList;
                 }
             };
 
-            Gson gson = new Gson();
-            Type typeArrayPlaylist = new TypeToken<ArrayList<Playlist>>(){}.getType();
-            String json = mSettings.getString("Playlists", "");
-            ArrayList<Playlist> playlists = gson.fromJson(json, typeArrayPlaylist);
+            Gson gson;
+            Type typeArrayPlaylist;
+            String json;
+            ArrayList<Playlist> playlists;
+
+            gson = new Gson();
+            typeArrayPlaylist = new TypeToken<ArrayList<Playlist>>(){}.getType();
+            json = mSettings.getString("Playlists", "");
+            playlists = gson.fromJson(json, typeArrayPlaylist);
+
+            if(playlists == null){
+                Playlist playlist = new Playlist("Все треки", songs);
+                ArrayList<Playlist> playlistsOld = new ArrayList<Playlist>();
+                playlistsOld.add(playlist);
+
+                Gson gsonOld = new Gson();
+                String jsonOld = gsonOld.toJson(playlistsOld);
+                editor = mSettings.edit();
+                editor.putString("Playlists", jsonOld);
+                editor.apply();
+
+                gson = new Gson();
+                typeArrayPlaylist = new TypeToken<ArrayList<Playlist>>(){}.getType();
+                json = mSettings.getString("Playlists", "");
+                playlists = gson.fromJson(json, typeArrayPlaylist);
+            }
+
+            playlists.get(0).setSongs(songs);
 
             playlistsAdapter =
                     new PlaylistsAdapter(getContext(), getActivity(), playlists, recyclerPlaylist, recyclerSongs, onClickListener);
-
-            layoutPlaylistsRecycler.setTranslationX(-1000f);
 
             LinearLayoutManager linearLayoutManager =
                     new LinearLayoutManager(getContext(),  LinearLayoutManager.VERTICAL, false);
@@ -275,8 +298,7 @@ import java.util.ArrayList;
 
             recyclerPlaylist.setAdapter(playlistsAdapter);
 
-            layoutPlaylistsRecycler.animate().translationXBy(1000f).setDuration(500).setStartDelay(250).start();
-
+            recyclerPlaylist.suppressLayout(true);
         }
     }
 
@@ -284,6 +306,7 @@ import java.util.ArrayList;
 
         ValueAnimator anim;
         int playlistsRecyclerHeight = (int) getResources().getDimension(R.dimen.get_playlists_recycler_height);
+        recyclerPlaylist.suppressLayout(false);
 
         if(!statePlaylistRecycler){
             anim = ValueAnimator.ofInt( playlistsRecyclerHeight, 700);
@@ -316,6 +339,7 @@ import java.util.ArrayList;
                     recyclerPlaylist.scrollToPosition(playlistsAdapter.getPositionItem());
                 }
 
+                recyclerPlaylist.suppressLayout(true);
             }
         });
 

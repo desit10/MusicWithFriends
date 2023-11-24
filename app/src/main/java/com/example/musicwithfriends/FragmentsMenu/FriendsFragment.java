@@ -57,6 +57,7 @@ public class FriendsFragment extends Fragment {
         //    mParam2 = getArguments().getString(ARG_PARAM2);
         //}
         TransitionInflater inflater = TransitionInflater.from(requireContext());
+        this.setEnterTransition(inflater.inflateTransition(R.transition.slide_left));
         this.setExitTransition(inflater.inflateTransition(R.transition.slide_right));
     }
 
