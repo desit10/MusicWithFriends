@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "520944112625",
-    "project_id": "music-with-friends-42119",
-    "storage_bucket": "music-with-friends-42119.appspot.com"
+    "project_number": "163031948183",
+    "project_id": "musicdb2",
+    "storage_bucket": "musicdb2.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:520944112625:android:4be2f70736fd33df1a6a50",
+        "mobilesdk_app_id": "1:163031948183:android:de5d3cd64c04b85c5bc2d2",
         "android_client_info": {
           "package_name": "com.example.musicwithfriends"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDut-YaQJRHhzx3BxPZTGQJNpUHVYWbCLU"
+          "current_key": "AIzaSyA0utxuWZAmJAH-Lq8yxjibM0ulXHe54Ok"
         }
       ],
       "services": {

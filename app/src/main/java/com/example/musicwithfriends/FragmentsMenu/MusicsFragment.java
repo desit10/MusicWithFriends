@@ -242,7 +242,8 @@ import java.util.ArrayList;
                         ""
                 );
 
-                if(new File(song.getPath()).exists()){
+                File songFile = new File(song.getPath());
+                if(songFile.exists()){
                     songs.add(song);
                 }
 
@@ -259,17 +260,26 @@ import java.util.ArrayList;
                 }
             };
 
-            Gson gson;
-            Type typeArrayPlaylist;
-            String json;
-            ArrayList<Playlist> playlists;
-
-            gson = new Gson();
-            typeArrayPlaylist = new TypeToken<ArrayList<Playlist>>(){}.getType();
-            json = mSettings.getString("Playlists", "");
-            playlists = gson.fromJson(json, typeArrayPlaylist);
-
+            Gson gson = new Gson();
+            Type typeArrayPlaylist = new TypeToken<ArrayList<Playlist>>(){}.getType();
+            String json = mSettings.getString("Playlists", "");
+            ArrayList<Playlist> playlists = gson.fromJson(json, typeArrayPlaylist);
+            Playlist playlist = new Playlist("Все треки", songs);
             if(playlists == null){
+                playlists = new ArrayList<>();
+                playlists.add(playlist);
+            }
+
+            playlists.get(0).setName(playlist.getName());
+            playlists.get(0).setSongs(playlist.getSongs());
+
+            Gson gsonOld = new Gson();
+            String jsonOld = gsonOld.toJson(playlists);
+            editor = mSettings.edit();
+            editor.putString("Playlists", jsonOld);
+            editor.apply();
+
+            /*if(playlists == null){
                 Playlist playlist = new Playlist("Все треки", songs);
                 ArrayList<Playlist> playlistsOld = new ArrayList<Playlist>();
                 playlistsOld.add(playlist);
@@ -280,13 +290,12 @@ import java.util.ArrayList;
                 editor.putString("Playlists", jsonOld);
                 editor.apply();
 
-                gson = new Gson();
-                typeArrayPlaylist = new TypeToken<ArrayList<Playlist>>(){}.getType();
-                json = mSettings.getString("Playlists", "");
-                playlists = gson.fromJson(json, typeArrayPlaylist);
-            }
+                playlists = new ArrayList<>();
+                playlists.add(playlist);
 
-            playlists.get(0).setSongs(songs);
+            }
+            playlists.get(0).setSongs(songs);*/
+
 
             playlistsAdapter =
                     new PlaylistsAdapter(getContext(), getActivity(), playlists, recyclerPlaylist, recyclerSongs, onClickListener);

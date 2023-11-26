@@ -24,6 +24,7 @@ import com.example.musicwithfriends.R;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
@@ -54,20 +55,23 @@ public class DialogSongsAdapter extends RecyclerView.Adapter<DialogSongsAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
-        Boolean check = false;
         Song song = songs.get(position);
 
         //Создание обложки песни
-        android.media.MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(song.getPath());
-        byte[] data = mmr.getEmbeddedPicture();
+        if(new File(song.getPath()).exists()){
+            android.media.MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+            mmr.setDataSource(song.getPath());
+            byte[] data = mmr.getEmbeddedPicture();
 
-        //Если обложки нет, то подставляем альтернативную абложку
-        if(data == null){
-            holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
+            //Если обложки нет, то подставляем альтернативную абложку
+            if(data == null){
+                holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
+            } else {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                holder.songAlbum.setImageBitmap(bitmap);
+            }
         } else {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-            holder.songAlbum.setImageBitmap(bitmap);
+            holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
         }
 
         holder.songTitle.setText(song.getTitle());

@@ -19,7 +19,7 @@
         android:theme="@style/Base.Theme.MusicWithFriends"
         tools:targetApi="31">
         <activity
-            android:name=".RoomSongs"
+            android:name=".RoomSongsActivity"
             android:exported="false" />
         <activity
             android:name=".RegistrationActivity"

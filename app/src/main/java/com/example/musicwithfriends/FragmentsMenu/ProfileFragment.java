@@ -21,9 +21,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicwithfriends.Adapters.DialogSongsAdapter;
 import com.example.musicwithfriends.Helpers.FirebaseHelper;
+import com.example.musicwithfriends.MainActivity;
 import com.example.musicwithfriends.Models.Room;
 import com.example.musicwithfriends.Models.Song;
 import com.example.musicwithfriends.R;
+import com.example.musicwithfriends.RoomSongsActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
@@ -127,30 +129,58 @@ public class ProfileFragment extends Fragment {
 
                         ArrayList<Song> roomPlaylist = dialogSongsAdapter.getRoomSong();
 
-                        Room room = new Room(roomPlaylist, 0, 0, 0);
+                        Room room = new Room(true, roomPlaylist, 0, 0, false);
 
                         DatabaseReference roomId = rooms.push();
                         roomId.setValue(room);
 
+                        if(roomPlaylist.size() == 0){
+                            dialog.dismiss();
+
+                            Intent roomIntent = new Intent(getContext(), RoomSongsActivity.class);
+                            roomIntent.putExtra("ROOM_ID", roomId.getKey());
+                            startActivity(roomIntent);
+
+                            Intent sendIntent = new Intent();
+                            sendIntent.setAction(Intent.ACTION_SEND);
+                            sendIntent.putExtra(Intent.EXTRA_TEXT, "http://musicwithfriends/" + roomId.getKey());
+                            sendIntent.setType("text/plain");
+
+                            Intent shareIntent = Intent.createChooser(sendIntent, null);
+                            startActivity(shareIntent);
+
+                            return;
+                        }
                         for(int i = 0; i < roomPlaylist.size(); i++){
                             Uri uriFile = Uri.fromFile(new File(roomPlaylist.get(i).getPath()));
 
                             StorageReference storageRef = FirebaseStorage.getInstance().getReference();
                             StorageReference ref = storageRef.child(roomId.getKey() + "/" + roomPlaylist.get(i).getSongName());
 
-                            ref.putFile(uriFile);
+                            UploadTask uploadTask = ref.putFile(uriFile);
+                            int counter = i;
+                            uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                    uploadTask.cancel();
+                                    if(counter == roomPlaylist.size() - 1){
+                                        dialog.dismiss();
+
+                                        Intent roomIntent = new Intent(getContext(), RoomSongsActivity.class);
+                                        roomIntent.putExtra("ROOM_ID", roomId.getKey());
+                                        startActivity(roomIntent);
+
+                                        Intent sendIntent = new Intent();
+                                        sendIntent.setAction(Intent.ACTION_SEND);
+                                        sendIntent.putExtra(Intent.EXTRA_TEXT, "http://musicwithfriends/" + roomId.getKey());
+                                        sendIntent.setType("text/plain");
+
+                                        Intent shareIntent = Intent.createChooser(sendIntent, null);
+                                        startActivity(shareIntent);
+                                    }
+                                }
+                            });
                         }
-
-                        dialog.dismiss();
-
-                        Intent sendIntent = new Intent();
-                        sendIntent.setAction(Intent.ACTION_SEND);
-                        sendIntent.putExtra(Intent.EXTRA_TEXT, "http://musicwithfriends/" + roomId.getKey());
-                        sendIntent.setType("text/plain");
-
-                        Intent shareIntent = Intent.createChooser(sendIntent, null);
-                        startActivity(shareIntent);
-
                     }
                 });
 

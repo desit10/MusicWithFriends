@@ -19,6 +19,7 @@ import com.example.musicwithfriends.Helpers.SnapHelperOneByOne;
 import com.example.musicwithfriends.Models.Song;
 import com.example.musicwithfriends.R;
 
+import java.io.File;
 import java.util.ArrayList;
 
 @UnstableApi
@@ -52,15 +53,19 @@ public class SongsFullScreenAdapter extends RecyclerView.Adapter<SongsFullScreen
 
         //Создание обложки песни
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(song.getPath());
-        byte[] data = mmr.getEmbeddedPicture();
-        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+        if(new File(song.getPath()).exists()){
+            mmr.setDataSource(song.getPath());
+            byte[] data = mmr.getEmbeddedPicture();
 
-        //Если обложки нет, то подставляем альтернативную абложку
-        if(bitmap == null){
-            holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
+            //Если обложки нет, то подставляем альтернативную абложку
+            if(data == null){
+                holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
+            } else {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                holder.songAlbum.setImageBitmap(bitmap);
+            }
         } else {
-            holder.songAlbum.setImageBitmap(bitmap);
+            holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
         }
 
         holder.songTitle.setText(song.getTitle());

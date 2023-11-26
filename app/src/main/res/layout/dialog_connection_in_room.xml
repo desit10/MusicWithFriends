@@ -30,7 +30,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:layout_marginTop="5dp"
-                    android:text="Выберите треки:"
+                    android:text="Что будете слушать с друзьями?"
+                    android:textAlignment="center"
                     android:textSize="18sp"
                     android:textColor="@color/blue"/>
 

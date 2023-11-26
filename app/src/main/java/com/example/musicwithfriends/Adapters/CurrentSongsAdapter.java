@@ -28,9 +28,11 @@ import androidx.media3.ui.PlayerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.musicwithfriends.Helpers.FirebaseHelper;
 import com.example.musicwithfriends.Helpers.SnapHelperOneByOne;
 import com.example.musicwithfriends.Models.Song;
 import com.example.musicwithfriends.R;
+import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -53,17 +55,6 @@ public class CurrentSongsAdapter extends RecyclerView.Adapter<CurrentSongsAdapte
         this.context = context;
         this.recyclerCurrentSongs = recyclerCurrentSongs;
         this.songs = songs;
-
-        /*ArrayList<MediaItem> mediaItems = new ArrayList<>();
-        for(Song song : songs){
-            mediaItems.add(MediaItem.fromUri(song.getPath()));
-        }*/
-
-        /*player = new ExoPlayer.Builder(context)
-                .setSeekForwardIncrementMs(5000)
-                .build();
-
-        player.setMediaItems(mediaItems);*/
     }
 
     @NonNull
@@ -95,6 +86,7 @@ public class CurrentSongsAdapter extends RecyclerView.Adapter<CurrentSongsAdapte
                 Player.Listener.super.onPlaybackStateChanged(playbackState);
 
                 if(playbackState == Player.STATE_ENDED){
+
                     setViewHolder(holder);
 
                     recyclerCurrentSongs.scrollToPosition(position + 1);
@@ -134,13 +126,6 @@ public class CurrentSongsAdapter extends RecyclerView.Adapter<CurrentSongsAdapte
         holder.songArtist.requestFocus();
 
 
-        holder.songHeart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
         //Play\Pause песни
         holder.songManagement.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -179,18 +164,12 @@ public class CurrentSongsAdapter extends RecyclerView.Adapter<CurrentSongsAdapte
         }
         setViewHolder(holder);
     }
-    @Override
-    public void onViewRecycled(@NonNull ViewHolder holder) {
-        super.onViewRecycled(holder);
-        //holder.setIsRecyclable(true);
-    }
 
     //При исчезнавении элемента с экрана заканчиваем песню
     @Override
     public void onViewDetachedFromWindow(@NonNull ViewHolder holder) {
         super.onViewDetachedFromWindow(holder);
 
-        //holder.setIsRecyclable(false);
         holder.playerView.getPlayer().stop();
     }
 
@@ -394,7 +373,7 @@ public class CurrentSongsAdapter extends RecyclerView.Adapter<CurrentSongsAdapte
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            songHeart = itemView.findViewById(R.id.songHeart);
+            //songHeart = itemView.findViewById(R.id.songHeart);
             songManagement = itemView.findViewById(R.id.songManagement);
 
             playerView = itemView.findViewById(R.id.playerSong);

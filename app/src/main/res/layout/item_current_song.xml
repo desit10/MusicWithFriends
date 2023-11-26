@@ -20,7 +20,7 @@ android:elevation="5dp">
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageButton
+        <!--<ImageButton
             android:id="@+id/songHeart"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -30,35 +30,34 @@ android:elevation="5dp">
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/red"/>
+            app:tint="@color/red"/>-->
 
         <LinearLayout
             android:id="@+id/songInfo"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginStart="10dp"
             android:layout_marginEnd="5dp"
-            android:orientation="vertical"
             android:gravity="center"
+            android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/songManagement"
-            app:layout_constraintStart_toEndOf="@+id/songHeart"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:id="@+id/songTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:singleLine="true"/>
+                android:singleLine="true"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/songArtist"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="12sp"
+                android:singleLine="true"
                 android:textColor="@color/gray"
-                android:singleLine="true" />
+                android:textSize="12sp" />
 
         </LinearLayout>
 

@@ -68,22 +68,6 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
     PlaylistsAdapter playlistsAdapter;
     int positionPlaylist;
 
-    public PlaylistsAdapter getPlaylistsAdapter() {
-        return playlistsAdapter;
-    }
-
-    public void setPlaylistsAdapter(PlaylistsAdapter playlistsAdapter) {
-        this.playlistsAdapter = playlistsAdapter;
-    }
-
-    public int getPositionPlaylist() {
-        return positionPlaylist;
-    }
-
-    public void setPositionPlaylist(int positionPlaylist) {
-        this.positionPlaylist = positionPlaylist;
-    }
-
     public SongsAdapter(Context context, FragmentActivity mainActivity, ArrayList<Song> songs, Boolean stateAdapter) {
         this.context = context;
         this.mainActivity = mainActivity;
@@ -108,15 +92,19 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
 
         //Создание обложки песни
         android.media.MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(song.getPath());
-        byte[] data = mmr.getEmbeddedPicture();
+        if(new File(song.getPath()).exists()){
+            mmr.setDataSource(song.getPath());
+            byte[] data = mmr.getEmbeddedPicture();
 
-        //Если обложки нет, то подставляем альтернативную абложку
-        if(data == null){
-            holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
+            //Если обложки нет, то подставляем альтернативную абложку
+            if(data == null){
+                holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
+            } else {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                holder.songAlbum.setImageBitmap(bitmap);
+            }
         } else {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-            holder.songAlbum.setImageBitmap(bitmap);
+            holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
         }
 
         holder.songTitle.setText(song.getTitle());
@@ -380,26 +368,20 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
         mainDialog.show();
     }
 
-    public long getFilePathToMediaID(String songPath, Context context)
-    {
-        long id = 0;
-        ContentResolver cr = context.getContentResolver();
+    public PlaylistsAdapter getPlaylistsAdapter() {
+        return playlistsAdapter;
+    }
 
-        Uri uri = MediaStore.Files.getContentUri("external");
-        String selection = MediaStore.Audio.Media.DATA;
-        String[] selectionArgs = {songPath};
-        String[] projection = {MediaStore.Audio.Media._ID};
+    public void setPlaylistsAdapter(PlaylistsAdapter playlistsAdapter) {
+        this.playlistsAdapter = playlistsAdapter;
+    }
 
-        Cursor cursor = cr.query(uri, projection, selection + "=?", selectionArgs, null);
+    public int getPositionPlaylist() {
+        return positionPlaylist;
+    }
 
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                int idIndex = cursor.getColumnIndex(MediaStore.Audio.Media._ID);
-                id = Long.parseLong(cursor.getString(idIndex));
-            }
-        }
-
-        return id;
+    public void setPositionPlaylist(int positionPlaylist) {
+        this.positionPlaylist = positionPlaylist;
     }
 
     public  class ViewHolder extends RecyclerView.ViewHolder{
