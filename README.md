@@ -1,7 +1,7 @@
 # MusicWithFriends
 beta
 4Begemotikoff
-Пономаре Сергей
+Пономарев Сергей
 Пьяных Мария
 Мага
 
