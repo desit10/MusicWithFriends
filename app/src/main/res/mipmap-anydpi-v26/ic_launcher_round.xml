@@ -3,9 +3,9 @@
 
     <background>
         <shape>
-            <solid android:color="@color/blue"/>
+            <solid android:color="@color/bgcApp"/>
         </shape>
     </background>
-    <foreground android:drawable="@drawable/avd_icon_app"/>
+    <foreground android:drawable="@drawable/icon_app"/>
 
 </adaptive-icon>

@@ -2,12 +2,10 @@ package com.example.musicwithfriends.FragmentsMenu;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.transition.TransitionInflater;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,21 +19,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicwithfriends.Adapters.DialogSongsAdapter;
 import com.example.musicwithfriends.Helpers.FirebaseHelper;
-import com.example.musicwithfriends.MainActivity;
 import com.example.musicwithfriends.Models.Room;
 import com.example.musicwithfriends.Models.Song;
 import com.example.musicwithfriends.R;
-import com.example.musicwithfriends.RoomSongsActivity;
+import com.example.musicwithfriends.HostActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -100,91 +94,110 @@ public class ProfileFragment extends Fragment {
                 FirebaseHelper firebaseHelper = new FirebaseHelper();
                 DatabaseReference rooms = firebaseHelper.Request("rooms");
 
-                Dialog dialog = new Dialog(getContext());
-                dialog.setContentView(R.layout.dialog_connection_in_room);
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                dialog.getWindow().getAttributes().windowAnimations = R.style.DialogPlaylistAnimation;
-
-                RecyclerView songsRecycler = dialog.findViewById(R.id.songsRecycler);
-                LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
-
                 DialogSongsAdapter dialogSongsAdapter = new DialogSongsAdapter(getContext());
 
-                songsRecycler.setLayoutManager(layoutManager);
-                songsRecycler.setAdapter(dialogSongsAdapter);
+                if(dialogSongsAdapter.getItemCount() != 0) {
+                    Dialog dialog = new Dialog(getContext());
+                    dialog.setContentView(R.layout.dialog_connection_in_room);
+                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                    dialog.getWindow().getAttributes().windowAnimations = R.style.DialogPlaylistAnimation;
 
-                Button btnClose = dialog.findViewById(R.id.btnClose);
-                Button btnSave = dialog.findViewById(R.id.btnSave);
+                    RecyclerView songsRecycler = dialog.findViewById(R.id.songsRecycler);
+                    LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
 
-                btnClose.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                    }
-                });
-                btnSave.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+                    songsRecycler.setLayoutManager(layoutManager);
+                    songsRecycler.setAdapter(dialogSongsAdapter);
 
-                        ArrayList<Song> roomPlaylist = dialogSongsAdapter.getRoomSong();
+                    Button btnClose = dialog.findViewById(R.id.btnClose);
+                    Button btnSave = dialog.findViewById(R.id.btnSave);
 
-                        Room room = new Room(true, roomPlaylist, 0, 0, false);
-
-                        DatabaseReference roomId = rooms.push();
-                        roomId.setValue(room);
-
-                        if(roomPlaylist.size() == 0){
+                    btnClose.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
                             dialog.dismiss();
-
-                            Intent roomIntent = new Intent(getContext(), RoomSongsActivity.class);
-                            roomIntent.putExtra("ROOM_ID", roomId.getKey());
-                            startActivity(roomIntent);
-
-                            Intent sendIntent = new Intent();
-                            sendIntent.setAction(Intent.ACTION_SEND);
-                            sendIntent.putExtra(Intent.EXTRA_TEXT, "http://musicwithfriends/" + roomId.getKey());
-                            sendIntent.setType("text/plain");
-
-                            Intent shareIntent = Intent.createChooser(sendIntent, null);
-                            startActivity(shareIntent);
-
-                            return;
                         }
-                        for(int i = 0; i < roomPlaylist.size(); i++){
-                            Uri uriFile = Uri.fromFile(new File(roomPlaylist.get(i).getPath()));
+                    });
+                    btnSave.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
 
-                            StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-                            StorageReference ref = storageRef.child(roomId.getKey() + "/" + roomPlaylist.get(i).getSongName());
+                            ArrayList<Song> roomPlaylist = dialogSongsAdapter.getRoomSong();
 
-                            UploadTask uploadTask = ref.putFile(uriFile);
-                            int counter = i;
-                            uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                                @Override
-                                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                                    uploadTask.cancel();
-                                    if(counter == roomPlaylist.size() - 1){
-                                        dialog.dismiss();
+                            Room room = new Room(true, roomPlaylist, 0, 0, false);
 
-                                        Intent roomIntent = new Intent(getContext(), RoomSongsActivity.class);
-                                        roomIntent.putExtra("ROOM_ID", roomId.getKey());
-                                        startActivity(roomIntent);
+                            DatabaseReference roomId = rooms.push();
+                            roomId.setValue(room);
 
-                                        Intent sendIntent = new Intent();
-                                        sendIntent.setAction(Intent.ACTION_SEND);
-                                        sendIntent.putExtra(Intent.EXTRA_TEXT, "http://musicwithfriends/" + roomId.getKey());
-                                        sendIntent.setType("text/plain");
+                            if(roomPlaylist.size() == 0){
+                                dialog.dismiss();
 
-                                        Intent shareIntent = Intent.createChooser(sendIntent, null);
-                                        startActivity(shareIntent);
-                                    }
+                                Intent roomIntent = new Intent(getContext(), HostActivity.class);
+                                roomIntent.putExtra("ROOM_ID", roomId.getKey());
+                                startActivity(roomIntent);
+
+                                Intent sendIntent = new Intent();
+                                sendIntent.setAction(Intent.ACTION_SEND);
+                                sendIntent.putExtra(Intent.EXTRA_TEXT, "http://musicwithfriends/" + roomId.getKey());
+                                sendIntent.setType("text/plain");
+
+                                Intent shareIntent = Intent.createChooser(sendIntent, null);
+                                startActivity(shareIntent);
+                            } else {
+                                for(int i = 0; i < roomPlaylist.size(); i++){
+                                    Uri uriFile = Uri.fromFile(new File(roomPlaylist.get(i).getPath()));
+
+                                    StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+                                    StorageReference ref = storageRef.child(roomId.getKey() + "/" + roomPlaylist.get(i).getSongName());
+
+                                    UploadTask uploadTask = ref.putFile(uriFile);
+                                    int counter = i;
+                                    uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                            uploadTask.cancel();
+                                            if(counter == roomPlaylist.size() - 1){
+                                                dialog.dismiss();
+
+                                                Intent roomIntent = new Intent(getContext(), HostActivity.class);
+                                                roomIntent.putExtra("ROOM_ID", roomId.getKey());
+                                                startActivity(roomIntent);
+
+                                                Intent sendIntent = new Intent();
+                                                sendIntent.setAction(Intent.ACTION_SEND);
+                                                sendIntent.putExtra(Intent.EXTRA_TEXT, "http://musicwithfriends/" + roomId.getKey());
+                                                sendIntent.setType("text/plain");
+
+                                                Intent shareIntent = Intent.createChooser(sendIntent, null);
+                                                startActivity(shareIntent);
+                                            }
+                                        }
+                                    });
                                 }
-                            });
+                            }
                         }
-                    }
-                });
+                    });
 
-                dialog.show();
+                    dialog.show();
+                } else {
+                    Room room = new Room(true, null, 0, 0, false);
+
+                    DatabaseReference roomId = rooms.push();
+                    roomId.setValue(room);
+
+                    Intent roomIntent = new Intent(getContext(), HostActivity.class);
+                    roomIntent.putExtra("ROOM_ID", roomId.getKey());
+                    startActivity(roomIntent);
+
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, "http://musicwithfriends/" + roomId.getKey());
+                    sendIntent.setType("text/plain");
+
+                    Intent shareIntent = Intent.createChooser(sendIntent, null);
+                    startActivity(shareIntent);
+                }
+
             }
         });
 

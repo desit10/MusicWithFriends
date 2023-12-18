@@ -9,10 +9,12 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -20,6 +22,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.splashscreen.SplashScreen;
 import androidx.core.widget.ImageViewCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -56,13 +59,28 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private NavHostFragment navHostFragment;
     private NavController navController;
-    private int BackFromAppCount = 0;
     private MenuItem menuItem;
-    Room room = null;
+    private int BackFromAppCount = 0;
+    private boolean isReady = false;
+    private Room room = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SplashScreen.installSplashScreen(this);
+        View content = findViewById(android.R.id.content);
+        content.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                if(isReady){
+                    content.getViewTreeObserver().removeOnPreDrawListener(this);
+                }
+                dismissSplashScreen();
+                return false;
+            }
+        });
+
         setContentView(R.layout.activity_main);
 
         /*networkHelper = new NetworkHelper(this);
@@ -96,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 BackFromAppCount = 0;
                 menuItem = item;
-                ImageViewCompat.setImageTintList(floatingActionButton, ColorStateList.valueOf(ContextCompat.getColor(MainActivity.this, R.color.white)));
+                ImageViewCompat.setImageTintList(floatingActionButton, ColorStateList.valueOf(ContextCompat.getColor(MainActivity.this, R.color.smoky_white)));
                 item.setCheckable(true);
                 item.setChecked(true);
                 navController.popBackStack();
@@ -120,92 +138,100 @@ public class MainActivity extends AppCompatActivity {
                     for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                         Log.e("Room", dataSnapshot.toString());
 
-                        room = dataSnapshot.getValue(Room.class);
-
-                        Dialog dialog = new Dialog(MainActivity.this);
-                        dialog.setContentView(R.layout.dialog_connection_in_room);
-                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                        dialog.getWindow().getAttributes().windowAnimations = R.style.DialogPlaylistAnimation;
-
-                        RecyclerView songsRecycler = dialog.findViewById(R.id.songsRecycler);
-                        LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this, RecyclerView.VERTICAL, false);
-
                         DialogSongsAdapter dialogSongsAdapter = new DialogSongsAdapter(MainActivity.this);
 
-                        songsRecycler.setLayoutManager(layoutManager);
-                        songsRecycler.setAdapter(dialogSongsAdapter);
+                        room = dataSnapshot.getValue(Room.class);
 
-                        Button btnClose = dialog.findViewById(R.id.btnClose);
-                        Button btnSave = dialog.findViewById(R.id.btnSave);
+                        if(dialogSongsAdapter.getItemCount() != 0){
+                            Dialog dialog = new Dialog(MainActivity.this);
+                            dialog.setContentView(R.layout.dialog_connection_in_room);
+                            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                            dialog.getWindow().getAttributes().windowAnimations = R.style.DialogPlaylistAnimation;
 
-                        btnClose.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                dialog.dismiss();
-                            }
-                        });
-                        btnSave.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
+                            RecyclerView songsRecycler = dialog.findViewById(R.id.songsRecycler);
+                            LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this, RecyclerView.VERTICAL, false);
 
-                                ArrayList<Song> roomPlaylist = room.getRoomPlaylist();
-                                ArrayList<Song> userSong = dialogSongsAdapter.getRoomSong();
-                                if(userSong.size() != 0) {
+                            songsRecycler.setLayoutManager(layoutManager);
+                            songsRecycler.setAdapter(dialogSongsAdapter);
 
-                                    ArrayList<Song> deleteSongs = new ArrayList<>();
-                                    Log.e("aaa", roomPlaylist.toString());
-                                    Log.e("aaa", userSong.toString());
+                            Button btnClose = dialog.findViewById(R.id.btnClose);
+                            Button btnSave = dialog.findViewById(R.id.btnSave);
 
-                                    roomPlaylist.addAll(userSong);
+                            btnClose.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    dialog.dismiss();
+                                }
+                            });
+                            btnSave.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
 
-                                    for (int i = 0; i < userSong.size(); i++) {
-                                        for (int j = 0; j < roomPlaylist.size(); j++) {
-                                            if (roomPlaylist.get(j).getTitle().equals(userSong.get(i).getTitle())) {
-                                                deleteSongs.add(userSong.get(i));
-                                            }
-                                        }
-                                    }
-                                    roomPlaylist.removeAll(deleteSongs);
+                                    ArrayList<Song> roomPlaylist = room.getRoomPlaylist();
+                                    ArrayList<Song> userSong = dialogSongsAdapter.getRoomSong();
+                                    if(userSong.size() != 0) {
 
+                                        ArrayList<Song> deleteSongs = new ArrayList<>();
 
-                                    for (int i = 0; i < roomPlaylist.size(); i++) {
-                                        Uri uriFile = Uri.fromFile(new File(roomPlaylist.get(i).getPath()));
+                                        roomPlaylist.addAll(userSong);
 
-                                        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-                                        StorageReference ref = storageRef.child(roomId + "/" + roomPlaylist.get(i).getSongName());
-
-                                        UploadTask uploadTask = ref.putFile(uriFile);
-                                        int counter = i;
-                                        uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                                                uploadTask.cancel();
-                                                if (counter == roomPlaylist.size() - 1) {
-                                                    dialog.dismiss();
-
-                                                    Intent roomIntent = new Intent(MainActivity.this, RoomSongsActivity.class);
-                                                    roomIntent.putExtra("ROOM_ID", roomId);
-                                                    startActivity(roomIntent);
+                                        for (int i = 0; i < userSong.size(); i++) {
+                                            for (int j = 0; j < roomPlaylist.size(); j++) {
+                                                if (roomPlaylist.get(j).getTitle().equals(userSong.get(i).getTitle())) {
+                                                    deleteSongs.add(userSong.get(i));
                                                 }
                                             }
-                                        });
+                                        }
+                                        roomPlaylist.removeAll(deleteSongs);
+
+
+                                        for (int i = 0; i < roomPlaylist.size(); i++) {
+                                            Uri uriFile = Uri.fromFile(new File(roomPlaylist.get(i).getPath()));
+
+                                            StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+                                            StorageReference ref = storageRef.child(roomId + "/" + roomPlaylist.get(i).getSongName());
+
+                                            UploadTask uploadTask = ref.putFile(uriFile);
+                                            int counter = i;
+                                            uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                                    uploadTask.cancel();
+                                                    if (counter == roomPlaylist.size() - 1) {
+                                                        dialog.dismiss();
+
+                                                        Intent roomIntent = new Intent(MainActivity.this, HostActivity.class);
+                                                        roomIntent.putExtra("ROOM_ID", roomId);
+                                                        startActivity(roomIntent);
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    } else {
+                                        dialog.dismiss();
+
+                                        Intent roomIntent = new Intent(MainActivity.this, HostActivity.class);
+                                        roomIntent.putExtra("ROOM_ID", roomId);
+                                        startActivity(roomIntent);
                                     }
-                                } else {
-                                    dialog.dismiss();
 
-                                    Intent roomIntent = new Intent(MainActivity.this, RoomSongsActivity.class);
-                                    roomIntent.putExtra("ROOM_ID", roomId);
-                                    startActivity(roomIntent);
+                                    room.setHost(false);
+                                    room.setRoomPlaylist(roomPlaylist);
+                                    rooms.child(roomId).setValue(room);
                                 }
+                            });
 
-                                room.setHost(false);
-                                room.setRoomPlaylist(roomPlaylist);
-                                rooms.child(roomId).setValue(room);
-                            }
-                        });
+                            dialog.show();
+                        } else {
+                            Intent roomIntent = new Intent(MainActivity.this, HostActivity.class);
+                            roomIntent.putExtra("ROOM_ID", roomId);
+                            startActivity(roomIntent);
 
-                        dialog.show();
+                            room.setHost(false);
+                            rooms.child(roomId).setValue(room);
+                        }
+
                     }
                 }
 
@@ -222,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
                 if(menuItem != null){
                     menuItem.setCheckable(false);
                 }
-                ImageViewCompat.setImageTintList(floatingActionButton, ColorStateList.valueOf(ContextCompat.getColor(MainActivity.this, R.color.red)));
+                ImageViewCompat.setImageTintList(floatingActionButton, ColorStateList.valueOf(ContextCompat.getColor(MainActivity.this, R.color.black)));
                 navController.popBackStack();
                 navController.navigate(R.id.musicsFragment);
             }
@@ -246,4 +272,12 @@ public class MainActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, exitApp);
     }
 
+    private void dismissSplashScreen() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                isReady = true;
+            }
+        }, 1000);
+    }
 }

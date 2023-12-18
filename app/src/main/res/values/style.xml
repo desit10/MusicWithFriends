@@ -2,8 +2,8 @@
 <resources>
 
     <style name="Theme.StartApp" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/blue</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/avd_icon_app</item>
+        <item name="windowSplashScreenBackground">@color/bgcApp</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/icon_app</item>
         <item name="postSplashScreenTheme">@style/Base.Theme.MusicWithFriends</item>
     </style>
 

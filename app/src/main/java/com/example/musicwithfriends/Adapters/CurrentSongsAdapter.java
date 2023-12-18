@@ -73,11 +73,7 @@ public class CurrentSongsAdapter extends RecyclerView.Adapter<CurrentSongsAdapte
         Song song = songs.get(position);
 
         //В каждый элемент списка добавляем медиа
-        player = new ExoPlayer.Builder(context)
-                .setSeekForwardIncrementMs(5000)
-                .build();
-        player.setMediaItem(MediaItem.fromUri(song.getPath()));
-        holder.playerView.setPlayer(player);
+        addingSongToPlayer(holder, song);
 
         //При окончании воспроизведения медиа передаём списку следующую позицию
         holder.playerView.getPlayer().addListener(new Player.Listener() {
@@ -86,45 +82,13 @@ public class CurrentSongsAdapter extends RecyclerView.Adapter<CurrentSongsAdapte
                 Player.Listener.super.onPlaybackStateChanged(playbackState);
 
                 if(playbackState == Player.STATE_ENDED){
-
-                    setViewHolder(holder);
-
-                    recyclerCurrentSongs.scrollToPosition(position + 1);
-
-                    if(recyclerCurrentSongFullScreen != null){
-                        recyclerCurrentSongFullScreen.scrollToPosition(position + 1);
-                    }
-
-                    //Если песня из списка последняя, то начинаем воспроизведение сначала списка
-                    if(getItemCount() - 1 == position){
-                        recyclerCurrentSongs.scrollToPosition(0);
-
-                        if(recyclerCurrentSongFullScreen != null){
-                            recyclerCurrentSongFullScreen.scrollToPosition(0);
-                        }
-                    }
-
+                    checkingStatusSong(holder, position);
                 }
             }
         });
 
         //Бегущая строка на названии и артисте
-        holder.songTitle.setText(song.getTitle());
-        holder.songTitle.setSelected(true);
-        holder.songTitle.setEllipsize(TextUtils.TruncateAt.MARQUEE);
-        holder.songTitle.setMarqueeRepeatLimit(-1);
-        holder.songTitle.setFocusable(true);
-        holder.songTitle.setFocusableInTouchMode(true);
-        holder.songTitle.requestFocus();
-
-        holder.songArtist.setText(song.getArtist());
-        holder.songArtist.setSelected(true);
-        holder.songArtist.setEllipsize(TextUtils.TruncateAt.MARQUEE);
-        holder.songArtist.setMarqueeRepeatLimit(-1);
-        holder.songArtist.setFocusable(true);
-        holder.songArtist.setFocusableInTouchMode(true);
-        holder.songArtist.requestFocus();
-
+        runningLineTitleAndArtist(holder, song);
 
         //Play\Pause песни
         holder.songManagement.setOnClickListener(new View.OnClickListener() {
@@ -154,12 +118,13 @@ public class CurrentSongsAdapter extends RecyclerView.Adapter<CurrentSongsAdapte
     public void onViewAttachedToWindow(@NonNull ViewHolder holder) {
         super.onViewAttachedToWindow(holder);
 
+        holder.playerView.getPlayer().prepare();
+
         if(!getStateSong()){
             holder.songManagement.setImageResource(R.drawable.song_play);
         } else {
             holder.songManagement.setImageResource(R.drawable.song_pause);
             holder.playerView.getPlayer().seekTo(0);
-            holder.playerView.getPlayer().prepare();
             holder.playerView.getPlayer().play();
         }
         setViewHolder(holder);
@@ -170,7 +135,51 @@ public class CurrentSongsAdapter extends RecyclerView.Adapter<CurrentSongsAdapte
     public void onViewDetachedFromWindow(@NonNull ViewHolder holder) {
         super.onViewDetachedFromWindow(holder);
 
+        holder.playerView.getPlayer().seekTo(0);
         holder.playerView.getPlayer().stop();
+    }
+    void addingSongToPlayer(ViewHolder holder, Song song){
+        player = new ExoPlayer.Builder(context)
+                .setSeekForwardIncrementMs(5000)
+                .build();
+        player.setMediaItem(MediaItem.fromUri(song.getPath()));
+        holder.playerView.setPlayer(player);
+    }
+    void checkingStatusSong(ViewHolder holder, int position){
+        setViewHolder(holder);
+
+        recyclerCurrentSongs.scrollToPosition(position + 1);
+
+        if(recyclerCurrentSongFullScreen != null){
+            recyclerCurrentSongFullScreen.scrollToPosition(position + 1);
+        }
+
+        //Если песня из списка последняя, то начинаем воспроизведение сначала списка
+        if(getItemCount() - 1 == position){
+            recyclerCurrentSongs.scrollToPosition(0);
+
+            if(recyclerCurrentSongFullScreen != null){
+                recyclerCurrentSongFullScreen.scrollToPosition(0);
+            }
+        }
+    }
+
+    void runningLineTitleAndArtist(ViewHolder holder, Song song){
+        holder.songTitle.setText(song.getTitle());
+        holder.songTitle.setSelected(true);
+        holder.songTitle.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+        holder.songTitle.setMarqueeRepeatLimit(-1);
+        holder.songTitle.setFocusable(true);
+        holder.songTitle.setFocusableInTouchMode(true);
+        holder.songTitle.requestFocus();
+
+        holder.songArtist.setText(song.getArtist());
+        holder.songArtist.setSelected(true);
+        holder.songArtist.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+        holder.songArtist.setMarqueeRepeatLimit(-1);
+        holder.songArtist.setFocusable(true);
+        holder.songArtist.setFocusableInTouchMode(true);
+        holder.songArtist.requestFocus();
     }
 
     public void setStateSong(Boolean stateSong) {

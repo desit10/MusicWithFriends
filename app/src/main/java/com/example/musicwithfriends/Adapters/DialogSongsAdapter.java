@@ -42,6 +42,18 @@ public class DialogSongsAdapter extends RecyclerView.Adapter<DialogSongsAdapter.
 
         roomSong = new ArrayList<>();
         mSettings = context.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
+
+        Gson gson;
+        Type typeArrayPlaylist;
+        String json;
+        ArrayList<Playlist> playlists;
+
+        gson = new Gson();
+        typeArrayPlaylist = new TypeToken<ArrayList<Playlist>>(){}.getType();
+        json = mSettings.getString("Playlists", "");
+        playlists = gson.fromJson(json, typeArrayPlaylist);
+
+        songs = playlists.get(0).getSongs();
     }
 
     @NonNull
@@ -93,23 +105,6 @@ public class DialogSongsAdapter extends RecyclerView.Adapter<DialogSongsAdapter.
     @Override
     public int getItemCount() {
         return songs.size();
-    }
-
-    @Override
-    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
-        super.onAttachedToRecyclerView(recyclerView);
-
-        Gson gson;
-        Type typeArrayPlaylist;
-        String json;
-        ArrayList<Playlist> playlists;
-
-        gson = new Gson();
-        typeArrayPlaylist = new TypeToken<ArrayList<Playlist>>(){}.getType();
-        json = mSettings.getString("Playlists", "");
-        playlists = gson.fromJson(json, typeArrayPlaylist);
-
-        songs = playlists.get(0).getSongs();
     }
 
     public ArrayList<Song> getRoomSong() {

@@ -2,7 +2,10 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.MusicWithFriends" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="colorPrimary">@color/white</item>
+        <item name="android:windowLightStatusBar">@color/black</item>
+        <item name="android:navigationBarColor">@color/blue</item>
+        <item name="android:windowActivityTransitions">true</item>
     </style>
 
     <style name="Theme.MusicWithFriends" parent="Base.Theme.MusicWithFriends" >

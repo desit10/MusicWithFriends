@@ -3,16 +3,15 @@ package com.example.musicwithfriends.Models;
 import java.io.Serializable;
 
 public class Song implements Serializable {
-    String id, path, title, artist, genre, songName;
+    String id, path, title, artist, songName;
 
     public Song() {}
 
-    public Song(String id, String path, String title, String artist, String genre) {
+    public Song(String id, String path, String title, String artist) {
         this.id = id;
         this.path = path;
         this.title = title;
         this.artist = artist;
-        this.genre = genre;
     }
 
     public String getId() {
@@ -32,10 +31,6 @@ public class Song implements Serializable {
 
     public String getArtist() {
         return artist;
-    }
-
-    public String getGenre() {
-        return genre;
     }
 
     public String getSongName() {

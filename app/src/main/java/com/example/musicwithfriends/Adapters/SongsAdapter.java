@@ -91,21 +91,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
         Song song = songs.get(position);
 
         //Создание обложки песни
-        android.media.MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        if(new File(song.getPath()).exists()){
-            mmr.setDataSource(song.getPath());
-            byte[] data = mmr.getEmbeddedPicture();
-
-            //Если обложки нет, то подставляем альтернативную абложку
-            if(data == null){
-                holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
-            } else {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                holder.songAlbum.setImageBitmap(bitmap);
-            }
-        } else {
-            holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
-        }
+        creatingSongCover(holder, song);
 
         holder.songTitle.setText(song.getTitle());
         holder.songArtist.setText(song.getArtist());
@@ -114,19 +100,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                currentSongsAdapter = null;
-
-                currentSongsAdapter = new CurrentSongsAdapter(context, recyclerCurrentSong, songs);
-                recyclerCurrentSong.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
-
-                recyclerCurrentSong.setOnFlingListener(null);
-                snapHelperOneByOne = new SnapHelperOneByOne();
-                snapHelperOneByOne.attachToRecyclerView(recyclerCurrentSong);
-
-                recyclerCurrentSong.setAdapter(currentSongsAdapter);
-
-                currentSongsAdapter.setStateSong(true);
-                recyclerCurrentSong.scrollToPosition(position);
+                selectingTheCurrentSong(position);
             }
         });
 
@@ -143,11 +117,33 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
         return songs.size();
     }
 
-    //При появлении списка на экране создаём список текущих песен
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
 
+        //При появлении списка на экране создаём список текущих песен
+        creatingRecyclerCurrentSong();
+    }
+
+    void creatingSongCover(ViewHolder holder, Song song){
+        android.media.MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        if(new File(song.getPath()).exists()){
+            mmr.setDataSource(song.getPath());
+            byte[] data = mmr.getEmbeddedPicture();
+
+            //Если обложки нет, то подставляем альтернативную абложку
+            if(data == null){
+                holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
+            } else {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                holder.songAlbum.setImageBitmap(bitmap);
+            }
+        } else {
+            holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
+        }
+    }
+
+    void creatingRecyclerCurrentSong(){
         recyclerCurrentSong = mainActivity.findViewById(R.id.recyclerCurrentSong);
         currentSongsAdapter = new CurrentSongsAdapter(context, recyclerCurrentSong, songs);
         if(stateAdapter){
@@ -164,6 +160,22 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
             recyclerCurrentSong.animate().translationXBy(1000f).setDuration(500).setStartDelay(250).start();
 
         }
+    }
+
+    void selectingTheCurrentSong(int position) {
+        currentSongsAdapter = null;
+
+        currentSongsAdapter = new CurrentSongsAdapter(context, recyclerCurrentSong, songs);
+        recyclerCurrentSong.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+
+        recyclerCurrentSong.setOnFlingListener(null);
+        snapHelperOneByOne = new SnapHelperOneByOne();
+        snapHelperOneByOne.attachToRecyclerView(recyclerCurrentSong);
+
+        recyclerCurrentSong.setAdapter(currentSongsAdapter);
+
+        currentSongsAdapter.setStateSong(true);
+        recyclerCurrentSong.scrollToPosition(position);
     }
 
     public void showBottomDialog(int positionPlaylist, int positionSong) {
@@ -327,21 +339,16 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
                     editor.putString("Playlists", jsonOld);
                     editor.apply();
 
+                    File deleteSongFile = new File(song.getPath());
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        if(Environment.isExternalStorageManager(new File(song.getPath()))){
-                            File deleteSongFile = new File(song.getPath());
-                            deleteSongFile.delete();
+                        deleteSongFile.delete();
 
-                            songs = playlists.get(positionPlaylist).getSongs();
-                            notifyItemRemoved(positionSong);
-                            getPlaylistsAdapter().setPlaylists(playlists);
-                            getPlaylistsAdapter().notifyDataSetChanged();
-                        } else {
-                            Uri uri = Uri.parse("package:com.example.musicwithfriends");
-                            mainActivity.startActivity(new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri));
-                        }
+                        songs = playlists.get(positionPlaylist).getSongs();
+                        notifyItemRemoved(positionSong);
+                        getPlaylistsAdapter().setPlaylists(playlists);
+                        getPlaylistsAdapter().notifyDataSetChanged();
+
                     } else {
-                        File deleteSongFile = new File(song.getPath());
                         if(!deleteSongFile.delete()){
                             Toast.makeText(context, "Разрешите в настройках приложению управлять файлами устройства", Toast.LENGTH_SHORT).show();
                         } else {

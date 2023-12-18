@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="bgcMainActivity">#FFFFFFFF</color>
+    <color name="bgcAuthActivity">#2CA9BC</color>
+    <color name="iconApp">#FFF16065</color>
+    <color name="bgcApp">#FF000000</color>
+    <color name="textWhite">#FFFFFFFF</color>
+    <color name="bgcFabBtn">#FFFFFFFF</color>
+    <color name="fabBtn">#FF000000</color>
+    <color name="bottomAppBar">#FFFFFFFF</color>
+    <color name="textBlack">#FF000000</color>
+    <color name="selectNavItem">#FF000000</color>
+    <color name="navItem">#F5F5F5</color>
+
     <color name="black">#FF000000</color>
     <color name="gray">#A5A5A5</color>
     <color name="white">#FFFFFFFF</color>

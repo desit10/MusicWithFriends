@@ -6,7 +6,7 @@
     android:id="@+id/authorizationActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/green"
+    android:background="@color/bgcAuthActivity"
     tools:context=".AuthorizationActivity">
 
     <LinearLayout
@@ -26,7 +26,7 @@
                 android:layout_alignParentEnd="true"
                 android:scaleX="2"
                 android:scaleY="2"
-                android:src="@drawable/icon_auth"
+                android:src="@drawable/icon_app"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -36,8 +36,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Cooking Joy"
-                android:textColor="@color/white"
+                android:text="Music with friends"
+                android:textColor="@color/textWhite"
                 android:textSize="30sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -178,7 +178,7 @@
                 android:layout_centerHorizontal="true"
                 android:background="@color/transparent"
                 android:text="Зарегистрироваться"
-                android:textColor="@color/black"
+                android:textColor="@color/textWhite"
                 android:textSize="14sp"
                 android:autoSizeTextType="uniform"
                 app:layout_constraintEnd_toEndOf="parent"

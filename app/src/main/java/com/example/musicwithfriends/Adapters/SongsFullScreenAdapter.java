@@ -52,21 +52,7 @@ public class SongsFullScreenAdapter extends RecyclerView.Adapter<SongsFullScreen
         Song song = songs.get(position);
 
         //Создание обложки песни
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        if(new File(song.getPath()).exists()){
-            mmr.setDataSource(song.getPath());
-            byte[] data = mmr.getEmbeddedPicture();
-
-            //Если обложки нет, то подставляем альтернативную абложку
-            if(data == null){
-                holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
-            } else {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                holder.songAlbum.setImageBitmap(bitmap);
-            }
-        } else {
-            holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
-        }
+        creatingSongCover(holder, song);
 
         holder.songTitle.setText(song.getTitle());
         holder.songArtist.setText(song.getArtist());
@@ -94,6 +80,24 @@ public class SongsFullScreenAdapter extends RecyclerView.Adapter<SongsFullScreen
     public void onViewDetachedFromWindow(@NonNull ViewHolder holder) {
         super.onViewDetachedFromWindow(holder);
         scrollItem();
+    }
+
+    void creatingSongCover(ViewHolder holder, Song song){
+        android.media.MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        if(new File(song.getPath()).exists()){
+            mmr.setDataSource(song.getPath());
+            byte[] data = mmr.getEmbeddedPicture();
+
+            //Если обложки нет, то подставляем альтернативную абложку
+            if(data == null){
+                holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
+            } else {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                holder.songAlbum.setImageBitmap(bitmap);
+            }
+        } else {
+            holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
+        }
     }
 
     private void scrollItem(){

@@ -4,7 +4,7 @@
     <item
         android:id="@+id/friendsFragment"
         android:title=""
-        android:icon="@drawable/friends"/>
+        android:icon="@drawable/friends" />
 
     <item
         android:checkable="false"

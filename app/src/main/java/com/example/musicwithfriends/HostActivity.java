@@ -1,27 +1,19 @@
 package com.example.musicwithfriends;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.example.musicwithfriends.Adapters.CurrentSongsWithFriendsAdapter;
-import com.example.musicwithfriends.Adapters.SongsAdapter;
 import com.example.musicwithfriends.Adapters.SongsWithFriendsAdapter;
 import com.example.musicwithfriends.Helpers.FirebaseHelper;
 import com.example.musicwithfriends.Helpers.SnapHelperOneByOne;
 import com.example.musicwithfriends.Models.Room;
 import com.example.musicwithfriends.Models.Song;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -32,7 +24,7 @@ import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 
-public class RoomSongsActivity extends AppCompatActivity {
+public class HostActivity extends AppCompatActivity {
 
     RecyclerView songsRecycler, currentSongsRecycler;
     SongsWithFriendsAdapter songsWithFriendsAdapter;
@@ -65,34 +57,6 @@ public class RoomSongsActivity extends AppCompatActivity {
                     StorageReference storageReference = FirebaseStorage.getInstance().getReference(roomId + "/");
 
                     for(Song song : room.getRoomPlaylist()){
-/*
-                        storageReference.child(song.getSongName()).getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Uri> task) {
-                                        if(task.isComplete()){
-                                            song.setPath(task.getResult().toString());
-                                            songs.add(song);
-                                        }
-                                        if(room.getRoomPlaylist().size() == songs.size()){
-                                            room.setRoomPlaylist(songs);
-
-                                            songsRecycler.setLayoutManager(new LinearLayoutManager(RoomSongsActivity.this, LinearLayoutManager.VERTICAL, false));
-                                            songsWithFriendsAdapter =
-                                                    new SongsWithFriendsAdapter(RoomSongsActivity.this, currentSongsRecycler, room, roomId);
-                                            songsRecycler.setAdapter(songsWithFriendsAdapter);
-
-                                            currentSongsRecycler.setLayoutManager(new LinearLayoutManager(RoomSongsActivity.this, LinearLayoutManager.HORIZONTAL, false));
-                                            currentSongsWithFriendsAdapter =
-                                                    new CurrentSongsWithFriendsAdapter(RoomSongsActivity.this, currentSongsRecycler, room, roomId);
-
-                                            currentSongsRecycler.setAdapter(currentSongsWithFriendsAdapter);
-
-                                            currentSongsWithFriendsAdapter.setStateSong(room.getPlayPause());
-                                            currentSongsRecycler.scrollToPosition(room.getPositionSong());
-                                        }
-                                    }
-                                });
-*/
                         storageReference.child(song.getSongName()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
@@ -102,19 +66,21 @@ public class RoomSongsActivity extends AppCompatActivity {
                                 if(room.getRoomPlaylist().size() == songs.size()){
                                     room.setRoomPlaylist(songs);
 
-                                    songsRecycler.setLayoutManager(new LinearLayoutManager(RoomSongsActivity.this, LinearLayoutManager.VERTICAL, false));
+                                    songsRecycler.setLayoutManager(new LinearLayoutManager(HostActivity.this, LinearLayoutManager.VERTICAL, false));
                                     songsWithFriendsAdapter =
-                                            new SongsWithFriendsAdapter(RoomSongsActivity.this, currentSongsRecycler, room, roomId);
+                                            new SongsWithFriendsAdapter(HostActivity.this, currentSongsRecycler, room, roomId);
                                     songsRecycler.setAdapter(songsWithFriendsAdapter);
 
 
-                                    currentSongsRecycler.setLayoutManager(new LinearLayoutManager(RoomSongsActivity.this, LinearLayoutManager.HORIZONTAL, false));
+                                    currentSongsRecycler.setLayoutManager(new LinearLayoutManager(HostActivity.this, LinearLayoutManager.HORIZONTAL, false));
                                     currentSongsWithFriendsAdapter =
-                                            new CurrentSongsWithFriendsAdapter(RoomSongsActivity.this, currentSongsRecycler, room, roomId);
+                                            new CurrentSongsWithFriendsAdapter(HostActivity.this, currentSongsRecycler, room, roomId);
 
-                                    currentSongsRecycler.setOnFlingListener(null);
-                                    SnapHelperOneByOne snapHelperOneByOne = new SnapHelperOneByOne();
-                                    snapHelperOneByOne.attachToRecyclerView(currentSongsRecycler);
+                                    if(room.getHost()){
+                                        currentSongsRecycler.setOnFlingListener(null);
+                                        SnapHelperOneByOne snapHelperOneByOne = new SnapHelperOneByOne();
+                                        snapHelperOneByOne.attachToRecyclerView(currentSongsRecycler);
+                                    }
 
                                     currentSongsRecycler.setAdapter(currentSongsWithFriendsAdapter);
 
@@ -150,6 +116,8 @@ public class RoomSongsActivity extends AppCompatActivity {
                     if(!room.getHost()){
                         currentSongsWithFriendsAdapter.setStateSong(!dataSnapshot.getValue(Boolean.class));
                         currentSongsWithFriendsAdapter.PlayPause(currentSongsWithFriendsAdapter.getViewHolder());
+                    } else {
+                        //currentSongsWithFriendsAdapter.PlayPause(currentSongsWithFriendsAdapter.getViewHolder());
                     }
                 }
                 if(key.equals("roomPlaylist")){
