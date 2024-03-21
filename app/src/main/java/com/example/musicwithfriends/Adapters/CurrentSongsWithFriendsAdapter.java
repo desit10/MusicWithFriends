@@ -2,18 +2,12 @@ package com.example.musicwithfriends.Adapters;
 
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -24,18 +18,13 @@ import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.PlayerView;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicwithfriends.Helpers.FirebaseHelper;
-import com.example.musicwithfriends.Helpers.SnapHelperOneByOne;
 import com.example.musicwithfriends.Models.Room;
 import com.example.musicwithfriends.Models.Song;
 import com.example.musicwithfriends.R;
 import com.google.firebase.database.DatabaseReference;
-
-import java.util.ArrayList;
-import java.util.Locale;
 
 @UnstableApi
 public class CurrentSongsWithFriendsAdapter extends RecyclerView.Adapter<CurrentSongsWithFriendsAdapter.ViewHolder>{
@@ -47,7 +36,6 @@ public class CurrentSongsWithFriendsAdapter extends RecyclerView.Adapter<Current
     TextView currentTime;
     TextView fullTime;
     RecyclerView recyclerCurrentSongs, recyclerCurrentSongFullScreen;
-    ViewHolder viewHolder = null;
     Boolean stateSong = false;
     String roomId;
     FirebaseHelper firebaseHelper = new FirebaseHelper();
@@ -73,7 +61,6 @@ public class CurrentSongsWithFriendsAdapter extends RecyclerView.Adapter<Current
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
         Song song = room.getRoomPlaylist().get(position);
-
         //В каждый элемент списка добавляем медиа
         player = new ExoPlayer.Builder(context)
                 .setSeekForwardIncrementMs(5000)
@@ -88,17 +75,17 @@ public class CurrentSongsWithFriendsAdapter extends RecyclerView.Adapter<Current
                 Player.Listener.super.onPlaybackStateChanged(playbackState);
 
                 if(playbackState == Player.STATE_ENDED){
-                    DatabaseReference updateSongPosition = firebaseHelper.Request("rooms/" + roomId + "/positionSong");
+                    DatabaseReference updateCurrentSong = firebaseHelper.Request("rooms/" + roomId + "/currentSong");
+                    DatabaseReference updateProgressSong = firebaseHelper.Request("rooms/" + roomId + "/progressSong");
 
-                    setViewHolder(holder);
-
-                    updateSongPosition.setValue(position + 1);
+                    recyclerCurrentSongs.scrollToPosition(position);
 
                     //Если песня из списка последняя, то начинаем воспроизведение сначала списка
                     if(getItemCount() - 1 == position){
-                        updateSongPosition.setValue(0);
+                        recyclerCurrentSongs.scrollToPosition(position);
                     }
-
+                    updateCurrentSong.setValue(song.getSongName());
+                    updateProgressSong.setValue(holder.playerView.getPlayer().getCurrentPosition());
                 }
             }
         });
@@ -124,9 +111,10 @@ public class CurrentSongsWithFriendsAdapter extends RecyclerView.Adapter<Current
         holder.songManagement.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(room.getHost()) {
-                    PlayPause(holder);
-                }
+                stateSong(holder);
+
+                DatabaseReference updateProgressSong = firebaseHelper.Request("rooms/" + roomId + "/progressSong");
+                updateProgressSong.setValue(holder.playerView.getPlayer().getCurrentPosition());
             }
         });
 
@@ -138,28 +126,23 @@ public class CurrentSongsWithFriendsAdapter extends RecyclerView.Adapter<Current
         return room.getRoomPlaylist().size();
     }
 
-    @Override
-    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
-        super.onAttachedToRecyclerView(recyclerView);
-
-        recyclerView.scrollToPosition(room.getPositionSong());
-    }
-
     //При появлении элемента на экране запускаем песню
     @Override
     public void onViewAttachedToWindow(@NonNull ViewHolder holder) {
         super.onViewAttachedToWindow(holder);
+
+        holder.playerView.getPlayer().prepare();
 
         if(!getStateSong()){
             holder.songManagement.setImageResource(R.drawable.song_play);
         } else {
             holder.songManagement.setImageResource(R.drawable.song_pause);
             holder.playerView.getPlayer().seekTo(0);
-            holder.playerView.getPlayer().prepare();
             holder.playerView.getPlayer().play();
         }
 
-        setViewHolder(holder);
+        DatabaseReference updateProgressSong = firebaseHelper.Request("rooms/" + roomId + "/progressSong");
+        updateProgressSong.setValue(holder.playerView.getPlayer().getCurrentPosition());
     }
 
     //При исчезнавении элемента с экрана заканчиваем песню
@@ -168,6 +151,8 @@ public class CurrentSongsWithFriendsAdapter extends RecyclerView.Adapter<Current
         super.onViewDetachedFromWindow(holder);
 
         holder.playerView.getPlayer().stop();
+        DatabaseReference updateProgressSong = firebaseHelper.Request("rooms/" + roomId + "/progressSong");
+        updateProgressSong.setValue(holder.playerView.getPlayer().getCurrentPosition());
     }
 
     public void setStateSong(Boolean stateSong) {
@@ -178,16 +163,9 @@ public class CurrentSongsWithFriendsAdapter extends RecyclerView.Adapter<Current
         return stateSong;
     }
 
-    public void setViewHolder(ViewHolder viewHolder) {
-        this.viewHolder = viewHolder;
-    }
-
-    public ViewHolder getViewHolder() {
-        return viewHolder;
-    }
-
-    public void PlayPause(ViewHolder holder){
-        DatabaseReference updateSongPlayPause = firebaseHelper.Request("rooms/" + roomId + "/playPause");
+    public void stateSong(ViewHolder holder){
+        DatabaseReference updateProgressSong = firebaseHelper.Request("rooms/" + roomId + "/progressSong");
+        DatabaseReference updateStateSong = firebaseHelper.Request("rooms/" + roomId + "/stateSong");
         setStateSong(!getStateSong());
         if(!getStateSong()){
             holder.playerView.getPlayer().pause();
@@ -197,10 +175,8 @@ public class CurrentSongsWithFriendsAdapter extends RecyclerView.Adapter<Current
             holder.playerView.getPlayer().play();
             holder.songManagement.setImageResource(R.drawable.song_pause);
         }
-        if(room.getHost()){
-            updateSongPlayPause.setValue(getStateSong());
-        }
-
+        updateStateSong.setValue(getStateSong());
+        updateProgressSong.setValue(holder.playerView.getPlayer().getCurrentPosition());
     }
 
     public  class ViewHolder extends RecyclerView.ViewHolder{

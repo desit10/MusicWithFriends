@@ -1,6 +1,7 @@
 package com.example.musicwithfriends;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.media3.common.util.UnstableApi;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -14,7 +15,6 @@ import com.example.musicwithfriends.Helpers.SnapHelperOneByOne;
 import com.example.musicwithfriends.Models.Room;
 import com.example.musicwithfriends.Models.Song;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -24,18 +24,18 @@ import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 
+@UnstableApi
 public class HostActivity extends AppCompatActivity {
 
     RecyclerView songsRecycler, currentSongsRecycler;
     SongsWithFriendsAdapter songsWithFriendsAdapter;
     CurrentSongsWithFriendsAdapter currentSongsWithFriendsAdapter;
-    DatabaseReference roomUpdate;
     Room room;
     String roomId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_room_songs);
+        setContentView(R.layout.activity_host);
 
         roomId = getIntent().getStringExtra("ROOM_ID");
 
@@ -50,7 +50,7 @@ public class HostActivity extends AppCompatActivity {
 
                 //Перебор данных
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    //Создание объекта "Рецепт" и передаём в него данные
+
                     room = snapshot.getValue(Room.class);
 
                     ArrayList<Song> songs = new ArrayList<>();
@@ -84,8 +84,8 @@ public class HostActivity extends AppCompatActivity {
 
                                     currentSongsRecycler.setAdapter(currentSongsWithFriendsAdapter);
 
-                                    currentSongsWithFriendsAdapter.setStateSong(room.getPlayPause());
-                                    currentSongsRecycler.scrollToPosition(room.getPositionSong());
+                                    currentSongsWithFriendsAdapter.setStateSong(room.getStateSong());
+                                    currentSongsRecycler.scrollToPosition(0);
                                 }
                             }
                         });
@@ -97,52 +97,5 @@ public class HostActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-
-
-        roomUpdate = firebaseHelper.Request("rooms/" + roomId);
-        ChildEventListener childEventListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-                String key = dataSnapshot.getKey();
-                if(key.equals("positionSong") ){
-                    currentSongsRecycler.scrollToPosition(dataSnapshot.getValue(Integer.class));
-                }
-                if(key.equals("playPause")){
-                    if(!room.getHost()){
-                        currentSongsWithFriendsAdapter.setStateSong(!dataSnapshot.getValue(Boolean.class));
-                        currentSongsWithFriendsAdapter.PlayPause(currentSongsWithFriendsAdapter.getViewHolder());
-                    } else {
-                        //currentSongsWithFriendsAdapter.PlayPause(currentSongsWithFriendsAdapter.getViewHolder());
-                    }
-                }
-                if(key.equals("roomPlaylist")){
-                    /*songsWithFriendsAdapter.notifyDataSetChanged();
-                    currentSongsWithFriendsAdapter.notifyDataSetChanged();*/
-                }
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
-        roomUpdate.addChildEventListener(childEventListener);
-
     }
-
 }

@@ -24,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.splashscreen.SplashScreen;
 import androidx.core.widget.ImageViewCompat;
+import androidx.media3.common.util.UnstableApi;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -50,6 +51,7 @@ import com.google.firebase.storage.UploadTask;
 import java.io.File;
 import java.util.ArrayList;
 
+@UnstableApi
 public class MainActivity extends AppCompatActivity {
     public static final String APP_PREFERENCES = "mysettings";
     private SharedPreferences mSettings;
@@ -201,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
                                                     if (counter == roomPlaylist.size() - 1) {
                                                         dialog.dismiss();
 
-                                                        Intent roomIntent = new Intent(MainActivity.this, HostActivity.class);
+                                                        Intent roomIntent = new Intent(MainActivity.this, ClientActivity.class);
                                                         roomIntent.putExtra("ROOM_ID", roomId);
                                                         startActivity(roomIntent);
                                                     }
@@ -211,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
                                     } else {
                                         dialog.dismiss();
 
-                                        Intent roomIntent = new Intent(MainActivity.this, HostActivity.class);
+                                        Intent roomIntent = new Intent(MainActivity.this, ClientActivity.class);
                                         roomIntent.putExtra("ROOM_ID", roomId);
                                         startActivity(roomIntent);
                                     }
@@ -224,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
 
                             dialog.show();
                         } else {
-                            Intent roomIntent = new Intent(MainActivity.this, HostActivity.class);
+                            Intent roomIntent = new Intent(MainActivity.this, ClientActivity.class);
                             roomIntent.putExtra("ROOM_ID", roomId);
                             startActivity(roomIntent);
 

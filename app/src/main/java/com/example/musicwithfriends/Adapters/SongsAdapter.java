@@ -325,7 +325,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
 
                         for (int j = 0; j < playlists.get(i).getSongs().size(); j++){
 
-                            if(song.getId().equals(playlists.get(i).getSongs().get(j).getId())){
+                            if(song.getSongName().equals(playlists.get(i).getSongs().get(j).getSongName())){
                                playlists.get(i).getSongs().remove(j);
                             }
 

@@ -5,16 +5,16 @@ import java.util.ArrayList;
 public class Room {
 
     ArrayList<Song> roomPlaylist = new ArrayList<>();
-    int positionSong, progressSong;
-    Boolean isHost, playPause;
+    String currentSong;
+    int progressSong;
+    Boolean stateSong;
 
     public Room() {}
 
-    public Room(Boolean isHost,ArrayList<Song> songs, int positionSong, int progressSong, Boolean playPause) {
-        this.isHost = isHost;
-        this.positionSong = positionSong;
+    public Room(ArrayList<Song> songs, int progressSong, Boolean stateSong, String currentSong) {
         this.progressSong = progressSong;
-        this.playPause = playPause;
+        this.stateSong = stateSong;
+        this.currentSong = currentSong;
 
         if(songs != null){
             for (Song song : songs){
@@ -26,44 +26,23 @@ public class Room {
 
     }
 
-    public Boolean getHost() {
-        return isHost;
-    }
-
-    public void setHost(Boolean host) {
-        isHost = host;
-    }
 
     public ArrayList<Song> getRoomPlaylist() {
         return roomPlaylist;
     }
-
     public void setRoomPlaylist(ArrayList<Song> songs) {
         this.roomPlaylist = songs;
-    }
-
-
-    public int getPositionSong() {
-        return positionSong;
-    }
-
-    public void setPositionSong(int positionSong) {
-        this.positionSong = positionSong;
     }
 
     public int getProgressSong() {
         return progressSong;
     }
 
-    public void setProgressSong(int progressSong) {
-        this.progressSong = progressSong;
+    public boolean getStateSong() {
+        return stateSong;
     }
 
-    public boolean getPlayPause() {
-        return playPause;
-    }
-
-    public void setPlayPause(Boolean playPause) {
-        this.playPause = playPause;
+    public String getCurrentSong(){
+        return currentSong;
     }
 }

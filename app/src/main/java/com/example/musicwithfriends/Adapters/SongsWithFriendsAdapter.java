@@ -104,13 +104,11 @@ public class SongsWithFriendsAdapter extends RecyclerView.Adapter<SongsWithFrien
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(room.getHost()) {
-                    DatabaseReference updateSongPosition = firebaseHelper.Request("rooms/" + roomId + "/positionSong");
-                    updateSongPosition.setValue(position);
-                    DatabaseReference updateSongPlayPause = firebaseHelper.Request("rooms/" + roomId + "/playPause");
-                    updateSongPlayPause.setValue(true);
-                    recyclerCurrentSong.scrollToPosition(position);
-                }
+                recyclerCurrentSong.scrollToPosition(position);
+                DatabaseReference updateCurrentSong = firebaseHelper.Request("rooms/" + roomId + "/currentSong");
+                updateCurrentSong.setValue(song.getSongName());
+                DatabaseReference updateStateSong = firebaseHelper.Request("rooms/" + roomId + "/stateSong");
+                updateStateSong.setValue(true);
             }
         });
 
