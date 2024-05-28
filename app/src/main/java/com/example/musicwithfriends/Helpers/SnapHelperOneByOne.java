@@ -1,6 +1,5 @@
 package com.example.musicwithfriends.Helpers;
 
-import android.util.Log;
 import android.view.View;
 
 import androidx.recyclerview.widget.LinearLayoutManager;

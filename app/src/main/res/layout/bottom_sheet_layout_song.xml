@@ -3,12 +3,12 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/dialog_bcg">
+    android:background="@drawable/bcg_bottom_sheet">
 
     <ImageView
         android:layout_width="70dp"
         android:layout_height="wrap_content"
-        android:src="@drawable/baseline_remove_24"
+        android:src="@drawable/img_feature"
         android:layout_gravity="center|top"
         android:scaleType="centerCrop"/>
 
@@ -21,7 +21,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/baseline_close_24"
+            android:src="@drawable/btn_close"
             android:id="@+id/cancelButton"/>
 
     </LinearLayout>
@@ -38,7 +38,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/add_song_in_playlist" />
+            android:src="@drawable/btn_add_song_in_playlist" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -63,7 +63,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/share" />
+            android:src="@drawable/btn_share" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -87,7 +87,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/delete_song" />
+            android:src="@drawable/btn_delete_song" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -114,7 +114,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/trash" />
+            android:src="@drawable/btn_delete" />
 
         <TextView
             android:layout_width="wrap_content"

@@ -34,7 +34,7 @@ public class NetworkHelper {
         connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         networkInfo = connMgr.getActiveNetworkInfo();
 
-        if (networkInfo != null && networkInfo.isConnected()) {
+        if (networkInfo != null && networkInfo.isAvailable()) {
             dialog.dismiss();
             return true;
         } else {
@@ -48,11 +48,11 @@ public class NetworkHelper {
         dialog.setCanceledOnTouchOutside(false);
         dialog.setCancelable(false);
 
-        Button btnUpdateConnection = dialog.findViewById(R.id.btnUpdateConnection);
-        btnUpdateConnection.setOnClickListener(new View.OnClickListener() {
+        Button btnClose = dialog.findViewById(R.id.btnClose);
+        btnClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                checkNetworkConnection();
+                dialog.dismiss();
             }
         });
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="get_width">56dp</dimen>
+    <dimen name="get_padding_top">95dp</dimen>
     <dimen name="get_padding_bottom">155dp</dimen>
     <dimen name="get_playlists_recycler_height">50dp</dimen>
 </resources>

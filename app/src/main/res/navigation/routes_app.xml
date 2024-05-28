@@ -6,18 +6,18 @@
     app:startDestination="@id/musicsFragment">
 
     <fragment
-        android:id="@+id/profileFragment"
-        android:name="com.example.musicwithfriends.FragmentsMenu.ProfileFragment"
+        android:id="@+id/btnFragmentGroupListening"
+        android:name="com.example.musicwithfriends.FragmentsMenu.LaunchJointListeningFragment"
         android:label="fragment_profile"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_launch_joint_listening" />
     <fragment
         android:id="@+id/musicsFragment"
         android:name="com.example.musicwithfriends.FragmentsMenu.MusicsFragment"
         android:label="fragment_news"
         tools:layout="@layout/fragment_musics" />
     <fragment
-        android:id="@+id/friendsFragment"
-        android:name="com.example.musicwithfriends.FragmentsMenu.FriendsFragment"
+        android:id="@+id/btnFragmentMusicsServer"
+        android:name="com.example.musicwithfriends.FragmentsMenu.MusicServerFragment"
         android:label="fragment_medcard"
-        tools:layout="@layout/fragment_friends" />
+        tools:layout="@layout/fragment_musics_server" />
 </navigation>

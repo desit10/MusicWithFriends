@@ -17,12 +17,12 @@
         <item name="android:colorControlActivated">@color/white</item>
     </style>
 
-    <style name="DialogAnimation">
-        <item name="android:windowEnterAnimation">@anim/slide_in</item>
-        <item name="android:windowExitAnimation">@anim/slide_out</item>
+    <style name="AnimationContextMenu">
+        <item name="android:windowEnterAnimation">@anim/slide_in_context_menu</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_context_menu</item>
     </style>
 
-    <style name="DialogPlaylistAnimation">
+    <style name="AnimationDialog">
         <item name="android:windowEnterAnimation">@anim/slide_in_dialog</item>
         <item name="android:windowExitAnimation">@anim/slide_out_dialog</item>
     </style>

@@ -1,55 +1,27 @@
 package com.example.musicwithfriends.Adapters;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.media.MediaMetadataRetriever;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.os.Handler;
-import android.provider.Settings;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.FileProvider;
-import androidx.fragment.app.FragmentActivity;
 import androidx.media3.common.util.UnstableApi;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicwithfriends.Helpers.FirebaseHelper;
-import com.example.musicwithfriends.Helpers.SnapHelperOneByOne;
-import com.example.musicwithfriends.Models.Playlist;
 import com.example.musicwithfriends.Models.Room;
 import com.example.musicwithfriends.Models.Song;
 import com.example.musicwithfriends.R;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DatabaseReference;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.io.File;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 
 @UnstableApi
 public class SongsWithFriendsAdapter extends RecyclerView.Adapter<SongsWithFriendsAdapter.ViewHolder>{
@@ -81,20 +53,16 @@ public class SongsWithFriendsAdapter extends RecyclerView.Adapter<SongsWithFrien
         Song song = room.getRoomPlaylist().get(position);
 
         //Создание обложки песни
-        android.media.MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        if(new File(song.getPath()).exists()){
-            mmr.setDataSource(song.getPath());
-            byte[] data = mmr.getEmbeddedPicture();
+        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        mmr.setDataSource(song.getPath());
+        byte[] data = mmr.getEmbeddedPicture();
 
-            //Если обложки нет, то подставляем альтернативную абложку
-            if(data == null){
-                holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
-            } else {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                holder.songAlbum.setImageBitmap(bitmap);
-            }
+        //Если обложки нет, то подставляем альтернативную абложку
+        if(data == null){
+            holder.songAlbum.setImageResource(R.drawable.img_alternativ_song_album);
         } else {
-            holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+            holder.songAlbum.setImageBitmap(bitmap);
         }
 
         holder.songTitle.setText(song.getTitle());
@@ -107,8 +75,8 @@ public class SongsWithFriendsAdapter extends RecyclerView.Adapter<SongsWithFrien
                 recyclerCurrentSong.scrollToPosition(position);
                 DatabaseReference updateCurrentSong = firebaseHelper.Request("rooms/" + roomId + "/currentSong");
                 updateCurrentSong.setValue(song.getSongName());
-                DatabaseReference updateStateSong = firebaseHelper.Request("rooms/" + roomId + "/stateSong");
-                updateStateSong.setValue(true);
+                /*DatabaseReference updateStateSong = firebaseHelper.Request("rooms/" + roomId + "/stateSong");
+                updateStateSong.setValue(true);*/
             }
         });
 

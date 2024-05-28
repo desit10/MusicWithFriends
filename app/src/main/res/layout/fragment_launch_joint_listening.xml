@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/transparent"
+    android:padding="20dp"
+    tools:context=".FragmentsMenu.LaunchJointListeningFragment">
+
+    <TextView
+        android:id="@+id/textViewHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="5dp"
+        android:text="Насладись музыкой с друзьями!"
+        android:textAlignment="center"
+        android:textColor="@color/blue"
+        android:textSize="24sp"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewTitleRecycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="Выберите треки для прослушивания:"
+        android:textAlignment="textStart"
+        android:textColor="@color/blue"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@+id/textViewHeader" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerSongs"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        android:background="@drawable/bcg_default"
+        android:elevation="5dp"
+        android:padding="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/layoutUserData"
+        app:layout_constraintTop_toBottomOf="@+id/textViewTitleRecycler"
+        tools:layout_editor_absoluteX="30dp" />
+
+    <LinearLayout
+        android:id="@+id/layoutUserData"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/btnStartJointListening">
+
+        <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/bcg_img_user"
+            android:elevation="5dp"
+            android:src="@drawable/img_user"
+            android:scaleType="center"/>
+
+        <EditText
+            android:id="@+id/editTextNickname"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:padding="10dp"
+            android:background="@drawable/bcg_default"
+            android:elevation="5dp"
+            android:hint="Никнейм"
+            android:inputType="text" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnStartJointListening"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/get_padding_bottom"
+        android:backgroundTint="@color/blue"
+        android:text="Начать совеместно прослушиване"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:elevation="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

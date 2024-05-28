@@ -7,7 +7,7 @@ android:layout_width="match_parent"
 android:layout_height="match_parent"
 android:layout_margin="10dp"
 android:padding="5dp"
-android:background="@drawable/background_frame"
+android:background="@drawable/bcg_frame"
 android:elevation="5dp">
 
     <androidx.media3.ui.PlayerView
@@ -20,20 +20,8 @@ android:elevation="5dp">
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!--<ImageButton
-            android:id="@+id/songHeart"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:background="@color/transparent"
-            android:src="@drawable/heart_music"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/red"/>-->
-
         <LinearLayout
-            android:id="@+id/songInfo"
+            android:id="@+id/layoutSongInfo"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginEnd="5dp"
@@ -67,7 +55,7 @@ android:elevation="5dp">
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
             android:background="@color/transparent"
-            android:src="@drawable/song_play"
+            android:src="@drawable/btn_song_play"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

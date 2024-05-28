@@ -30,6 +30,7 @@ import androidx.media3.common.util.UnstableApi;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.musicwithfriends.MainActivity;
 import com.example.musicwithfriends.Models.Playlist;
 import com.example.musicwithfriends.Models.Song;
 import com.example.musicwithfriends.R;
@@ -50,7 +51,7 @@ public class PlaylistsAdapter extends RecyclerView.Adapter<PlaylistsAdapter.View
     private SharedPreferences.Editor editor;
 
     Context context;
-    FragmentActivity mainActivity;
+    MainActivity mainActivity;
     ArrayList<Playlist> playlists;
     RecyclerView recyclerPlaylist, recyclerSongs;
     SongsAdapter songsAdapter;
@@ -62,7 +63,7 @@ public class PlaylistsAdapter extends RecyclerView.Adapter<PlaylistsAdapter.View
         this.playlists = playlists;
     }
 
-    public PlaylistsAdapter(Context context, FragmentActivity mainActivity, ArrayList<Playlist> playlists,
+    public PlaylistsAdapter(Context context, MainActivity mainActivity, ArrayList<Playlist> playlists,
                             RecyclerView recyclerPlaylist, RecyclerView recyclerSongs, View.OnClickListener onClickListener) {
         this.context = context;
         this.playlists = playlists;
@@ -222,7 +223,7 @@ public class PlaylistsAdapter extends RecyclerView.Adapter<PlaylistsAdapter.View
 
         mainDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         mainDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        mainDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+        mainDialog.getWindow().getAttributes().windowAnimations = R.style.AnimationContextMenu;
         mainDialog.getWindow().setGravity(Gravity.BOTTOM);
 
         LinearLayout layoutRenamePlaylist = mainDialog.findViewById(R.id.layoutRenamePlaylist);
@@ -247,7 +248,7 @@ public class PlaylistsAdapter extends RecyclerView.Adapter<PlaylistsAdapter.View
                     dialog.setContentView(R.layout.dialog_rename_playlist);
                     dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                     dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                    dialog.getWindow().getAttributes().windowAnimations = R.style.DialogPlaylistAnimation;
+                    dialog.getWindow().getAttributes().windowAnimations = R.style.AnimationDialog;
 
                     TextInputLayout layoutNamePlaylist = dialog.findViewById(R.id.layoutNamePlaylist);
                     TextInputEditText namePlaylist = dialog.findViewById(R.id.namePlaylist);

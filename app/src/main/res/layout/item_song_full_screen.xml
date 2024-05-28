@@ -4,7 +4,8 @@ xmlns:android="http://schemas.android.com/apk/res/android"
 xmlns:app="http://schemas.android.com/apk/res-auto"
 android:id="@+id/layoutCurrentSong"
 android:layout_width="match_parent"
-android:layout_height="match_parent">
+android:layout_height="match_parent"
+android:paddingTop="50dp">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerCurrentSongFullScreen"
@@ -32,7 +33,7 @@ android:layout_height="match_parent">
             android:layout_marginStart="0dp"
             android:layout_marginBottom="0dp"
             android:text="00:00"
-            android:textColor="@color/gray"
+            android:textColor="@color/smoky_white"
             android:textSize="12dp" />
 
         <SeekBar
@@ -41,8 +42,8 @@ android:layout_height="match_parent">
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:progressBackgroundTint="@color/white"
-            android:progressTint="@color/red"
-            android:thumbTint="@color/red" />
+            android:progressTint="@color/white"
+            android:thumbTint="@color/white" />
 
         <TextView
             android:id="@+id/fullTime"
@@ -53,7 +54,7 @@ android:layout_height="match_parent">
             android:layout_marginEnd="0dp"
             android:layout_marginBottom="0dp"
             android:text="00:00"
-            android:textColor="@color/gray"
+            android:textColor="@color/smoky_white"
             android:textSize="12dp"/>
 
     </RelativeLayout>
@@ -79,8 +80,7 @@ android:layout_height="match_parent">
             android:layout_height="wrap_content"
             android:layout_weight="0.3"
             android:background="@color/transparent"
-            android:rotation="180"
-            android:src="@drawable/song_transition" />
+            android:src="@drawable/btn_last_song" />
 
         <ImageButton
             android:id="@+id/songManagement"
@@ -90,7 +90,7 @@ android:layout_height="match_parent">
             android:layout_marginStart="15dp"
             android:layout_marginEnd="15dp"
             android:background="@color/transparent"
-            android:src="@drawable/song_full_screen_pause" />
+            android:src="@drawable/btn_song_full_screen_pause" />
 
         <ImageButton
             android:id="@+id/songNext"
@@ -98,7 +98,7 @@ android:layout_height="match_parent">
             android:layout_height="wrap_content"
             android:layout_weight="0.3"
             android:background="@color/transparent"
-            android:src="@drawable/song_transition" />
+            android:src="@drawable/btn_next_song" />
 
     </LinearLayout>
 

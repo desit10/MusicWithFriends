@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="15dp"
-            android:background="@drawable/background_dialog"
+            android:background="@drawable/bcg_dialog"
             android:elevation="5dp"
             android:clickable="false">
 
@@ -30,28 +30,40 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:layout_marginTop="5dp"
-                    android:text="Что будете слушать с друзьями?"
+                    android:text="Установите аватар (необязательно) и никнейм."
                     android:textAlignment="center"
                     android:textSize="18sp"
                     android:textColor="@color/blue"/>
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <LinearLayout
+                    android:id="@+id/layoutUserData"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="10dp">
+                    android:orientation="horizontal"
+                    app:layout_constraintBottom_toTopOf="@+id/btnStartJointListening">
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/songsRecycler"
+                    <ImageButton
+                        android:id="@+id/btnImageAddAvatar"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_margin="10dp"
+                        android:background="@drawable/bcg_img_user"
+                        android:elevation="5dp"
+                        android:src="@drawable/img_user"
+                        android:scaleType="center"/>
+
+                    <EditText
+                        android:id="@+id/editTextNickname"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constrainedHeight="true"
-                        app:layout_constraintHeight_max="300dp" />
+                        android:layout_height="match_parent"
+                        android:layout_margin="10dp"
+                        android:padding="10dp"
+                        android:background="@drawable/bcg_message"
+                        android:elevation="5dp"
+                        android:hint="Никнейм"
+                        android:inputType="text" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"

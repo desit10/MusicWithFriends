@@ -35,12 +35,12 @@
         app:layout_constraintTop_toBottomOf="@+id/imgOffWifi" />
 
     <Button
-        android:id="@+id/btnUpdateConnection"
+        android:id="@+id/btnClose"
         android:layout_width="200dp"
         android:layout_height="50dp"
         android:layout_marginTop="10dp"
         android:backgroundTint="#4F98CA"
-        android:text="Обновить"
+        android:text="Закрыть"
         android:textSize="22sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"

@@ -19,7 +19,6 @@ import com.example.musicwithfriends.Helpers.SnapHelperOneByOne;
 import com.example.musicwithfriends.Models.Song;
 import com.example.musicwithfriends.R;
 
-import java.io.File;
 import java.util.ArrayList;
 
 @UnstableApi
@@ -29,7 +28,8 @@ public class SongsFullScreenAdapter extends RecyclerView.Adapter<SongsFullScreen
     ArrayList<Song> songs;
     RecyclerView recyclerCurrentSongs;
     SnapHelperOneByOne snapHelperOneByOne;
-    RecyclerView mRecyclerView;
+    RecyclerView thisRecyclerView;
+    int positionSong;
 
     public SongsFullScreenAdapter(Context context, ArrayList<Song> songs, RecyclerView recyclerCurrentSongs, SnapHelperOneByOne snapHelperOneByOne) {
         this.context = context;
@@ -67,7 +67,7 @@ public class SongsFullScreenAdapter extends RecyclerView.Adapter<SongsFullScreen
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
-        mRecyclerView = recyclerView;
+        thisRecyclerView = recyclerView;
     }
 
     @Override
@@ -84,26 +84,21 @@ public class SongsFullScreenAdapter extends RecyclerView.Adapter<SongsFullScreen
 
     void creatingSongCover(ViewHolder holder, Song song){
         android.media.MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        if(new File(song.getPath()).exists()){
-            mmr.setDataSource(song.getPath());
-            byte[] data = mmr.getEmbeddedPicture();
+        mmr.setDataSource(song.getPath());
+        byte[] data = mmr.getEmbeddedPicture();
 
-            //Если обложки нет, то подставляем альтернативную абложку
-            if(data == null){
-                holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
-            } else {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                holder.songAlbum.setImageBitmap(bitmap);
-            }
+        //Если обложки нет, то подставляем альтернативную абложку
+        if(data == null){
+            holder.songAlbum.setImageResource(R.drawable.img_alternativ_song_album);
         } else {
-            holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+            holder.songAlbum.setImageBitmap(bitmap);
         }
     }
 
-    private void scrollItem(){
-        recyclerCurrentSongs.scrollToPosition(
-                snapHelperOneByOne.findTargetSnapPosition(mRecyclerView.getLayoutManager(), 30, 0)
-        );
+    private void scrollItem() {
+        positionSong = snapHelperOneByOne.findTargetSnapPosition(thisRecyclerView.getLayoutManager(), 30, 0);
+        recyclerCurrentSongs.scrollToPosition(positionSong);
     }
 
     public  class ViewHolder extends RecyclerView.ViewHolder{

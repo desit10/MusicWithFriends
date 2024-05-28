@@ -1,6 +1,7 @@
 package com.example.musicwithfriends;
 
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,15 +11,21 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -27,16 +34,14 @@ import androidx.core.widget.ImageViewCompat;
 import androidx.media3.common.util.UnstableApi;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.musicwithfriends.Adapters.DialogSongsAdapter;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.example.musicwithfriends.Adapters.CurrentSongsAdapter;
 import com.example.musicwithfriends.Helpers.FirebaseHelper;
-import com.example.musicwithfriends.Helpers.NetworkHelper;
 import com.example.musicwithfriends.Models.Room;
 import com.example.musicwithfriends.Models.Song;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
@@ -44,11 +49,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
-import java.io.File;
 import java.util.ArrayList;
 
 @UnstableApi
@@ -56,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
     public static final String APP_PREFERENCES = "mysettings";
     private SharedPreferences mSettings;
     private SharedPreferences.Editor editor;
-    private NetworkHelper networkHelper;
     private FloatingActionButton floatingActionButton;
     private BottomNavigationView bottomNavigationView;
     private NavHostFragment navHostFragment;
@@ -65,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
     private int BackFromAppCount = 0;
     private boolean isReady = false;
     private Room room = null;
+    private String roomId;
+    private Uri uriAvatar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,20 +87,12 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        /*networkHelper = new NetworkHelper(this);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                networkHelper.checkNetworkConnection();
-            }
-        }, 2000);*/
-
         mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
         editor = mSettings.edit();
         editor.putBoolean("stateSongsAdapter", true);
         editor.apply();
 
-        // Получение ссылки из интента
+        // Получение ссылки из намерения
         Intent intent = getIntent();
         Uri data = intent.getData();
 
@@ -125,124 +119,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        if (data != null) {
-            // Выполнение нужных действий на основе ссылки
-            String path = data.getPath();
-
-            String[] separated = path.split("/");
-            String roomId = separated[separated.length - 1];
-
-            FirebaseHelper firebaseHelper = new FirebaseHelper();
-            DatabaseReference rooms = firebaseHelper.Request("rooms");
-            rooms.orderByKey().equalTo(roomId).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                        Log.e("Room", dataSnapshot.toString());
-
-                        DialogSongsAdapter dialogSongsAdapter = new DialogSongsAdapter(MainActivity.this);
-
-                        room = dataSnapshot.getValue(Room.class);
-
-                        if(dialogSongsAdapter.getItemCount() != 0){
-                            Dialog dialog = new Dialog(MainActivity.this);
-                            dialog.setContentView(R.layout.dialog_connection_in_room);
-                            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                            dialog.getWindow().getAttributes().windowAnimations = R.style.DialogPlaylistAnimation;
-
-                            RecyclerView songsRecycler = dialog.findViewById(R.id.songsRecycler);
-                            LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this, RecyclerView.VERTICAL, false);
-
-                            songsRecycler.setLayoutManager(layoutManager);
-                            songsRecycler.setAdapter(dialogSongsAdapter);
-
-                            Button btnClose = dialog.findViewById(R.id.btnClose);
-                            Button btnSave = dialog.findViewById(R.id.btnSave);
-
-                            btnClose.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    dialog.dismiss();
-                                }
-                            });
-                            btnSave.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-
-                                    ArrayList<Song> roomPlaylist = room.getRoomPlaylist();
-                                    ArrayList<Song> userSong = dialogSongsAdapter.getRoomSong();
-                                    if(userSong.size() != 0) {
-
-                                        ArrayList<Song> deleteSongs = new ArrayList<>();
-
-                                        roomPlaylist.addAll(userSong);
-
-                                        for (int i = 0; i < userSong.size(); i++) {
-                                            for (int j = 0; j < roomPlaylist.size(); j++) {
-                                                if (roomPlaylist.get(j).getTitle().equals(userSong.get(i).getTitle())) {
-                                                    deleteSongs.add(userSong.get(i));
-                                                }
-                                            }
-                                        }
-                                        roomPlaylist.removeAll(deleteSongs);
-
-
-                                        for (int i = 0; i < roomPlaylist.size(); i++) {
-                                            Uri uriFile = Uri.fromFile(new File(roomPlaylist.get(i).getPath()));
-
-                                            StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-                                            StorageReference ref = storageRef.child(roomId + "/" + roomPlaylist.get(i).getSongName());
-
-                                            UploadTask uploadTask = ref.putFile(uriFile);
-                                            int counter = i;
-                                            uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                                                    uploadTask.cancel();
-                                                    if (counter == roomPlaylist.size() - 1) {
-                                                        dialog.dismiss();
-
-                                                        Intent roomIntent = new Intent(MainActivity.this, ClientActivity.class);
-                                                        roomIntent.putExtra("ROOM_ID", roomId);
-                                                        startActivity(roomIntent);
-                                                    }
-                                                }
-                                            });
-                                        }
-                                    } else {
-                                        dialog.dismiss();
-
-                                        Intent roomIntent = new Intent(MainActivity.this, ClientActivity.class);
-                                        roomIntent.putExtra("ROOM_ID", roomId);
-                                        startActivity(roomIntent);
-                                    }
-
-                                    room.setHost(false);
-                                    room.setRoomPlaylist(roomPlaylist);
-                                    rooms.child(roomId).setValue(room);
-                                }
-                            });
-
-                            dialog.show();
-                        } else {
-                            Intent roomIntent = new Intent(MainActivity.this, ClientActivity.class);
-                            roomIntent.putExtra("ROOM_ID", roomId);
-                            startActivity(roomIntent);
-
-                            room.setHost(false);
-                            rooms.child(roomId).setValue(room);
-                        }
-
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                }
-            });
-        }
-
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -263,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                 BackFromAppCount++;
 
                 if(BackFromAppCount == 1){
-                    Toast.makeText(MainActivity.this, "Нажмите ещё раз для выхода ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Нажмите ещё раз для выхода", Toast.LENGTH_SHORT).show();
                 }
 
                 if(BackFromAppCount == 2){
@@ -272,6 +148,118 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         getOnBackPressedDispatcher().addCallback(this, exitApp);
+
+        if (data != null) {
+            // Выполнение нужных действий на основе ссылки
+            String path = data.getPath();
+
+            String[] separated = path.split("/");
+            roomId = separated[separated.length - 1];
+
+            FirebaseHelper firebaseHelper = new FirebaseHelper();
+            DatabaseReference roomsRef = firebaseHelper.Request("rooms");
+            roomsRef.orderByKey().equalTo(roomId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+
+                        room = dataSnapshot.getValue(Room.class);
+
+                        Dialog dialog = new Dialog(MainActivity.this);
+                        dialog.setContentView(R.layout.dialog_connection_in_room);
+                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                        dialog.getWindow().getAttributes().windowAnimations = R.style.AnimationDialog;
+
+                        EditText editTextNickname = dialog.findViewById(R.id.editTextNickname);
+
+                        Button btnClose = dialog.findViewById(R.id.btnClose);
+                        Button btnSave = dialog.findViewById(R.id.btnSave);
+
+                        btnClose.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();
+                            }
+                        });
+                        btnSave.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                String nickname = editTextNickname.getText().toString().trim();
+                                if(!TextUtils.isEmpty(nickname)){
+                                    startClientActivity(roomId, nickname);
+                                }
+                            }
+                        });
+
+                        dialog.show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+
+        PendingIntent pendingIntentDestroyTempPlayer = PendingIntent.getBroadcast(this, 0, new Intent("ACTION_DESTROY_TEMP_PLAYER"), PendingIntent.FLAG_MUTABLE);
+        try {
+            pendingIntentDestroyTempPlayer.send();
+        } catch (PendingIntent.CanceledException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        PendingIntent pendingIntentCreateTempPlayer = PendingIntent.getBroadcast(this, 0, new Intent("ACTION_CREATE_TEMP_PLAYER"), PendingIntent.FLAG_MUTABLE);
+        try {
+            pendingIntentCreateTempPlayer.send();
+        } catch (PendingIntent.CanceledException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        PendingIntent pendingIntentDestroyNotification = PendingIntent.getBroadcast(this, 0, new Intent("ACTION_DESTROY_NOTIFICATION"), PendingIntent.FLAG_MUTABLE);
+        try {
+            pendingIntentDestroyNotification.send();
+        } catch (PendingIntent.CanceledException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private ArrayList<Song> deletingDuplicateSongs(ArrayList<Song> roomPlaylist, ArrayList<Song> userSongs){
+        for (int i = 0; i < roomPlaylist.size(); i++) {
+            for (int j = 0; j < userSongs.size(); j++) {
+                if (roomPlaylist.get(i).getTitle().equals(userSongs.get(j).getTitle()) &&
+                        roomPlaylist.get(i).getArtist().equals(userSongs.get(j).getArtist())) {
+                    Log.e("SONG_DELETE", userSongs.get(j).getTitle());
+
+                    userSongs.remove(j);
+                }
+            }
+        }
+
+        return roomPlaylist;
+    }
+
+    private void startClientActivity(String roomId, String nickname){
+        Intent roomIntent = new Intent(MainActivity.this, ClientActivity.class);
+        roomIntent.putExtra("ROOM_ID", roomId);
+        roomIntent.putExtra("NICKNAME", nickname);
+
+        startActivity(roomIntent);
     }
 
     private void dismissSplashScreen() {

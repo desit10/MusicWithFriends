@@ -37,6 +37,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicwithfriends.Adapters.PlaylistsAdapter;
+import com.example.musicwithfriends.MainActivity;
 import com.example.musicwithfriends.Models.Playlist;
 import com.example.musicwithfriends.Models.Song;
 import com.example.musicwithfriends.R;
@@ -63,15 +64,15 @@ public class MusicsFragment extends Fragment {
     public static final String APP_PREFERENCES = "mysettings";
     private SharedPreferences mSettings;
     private SharedPreferences.Editor editor;
-    RecyclerView recyclerSongs, recyclerPlaylists;
-    PlaylistsAdapter playlistsAdapter;
-    ConstraintLayout layoutPlaylistsRecycler;
-    LinearLayout layoutPlaylistsManagement;
-    TextView textPlaylistsManagement;
-    ImageButton playlistsManagement;
-    ArrayList<Song> songs;
-    Boolean statePlaylistRecycler = false;
-    View view;
+    private RecyclerView recyclerSongs, recyclerPlaylists;
+    private PlaylistsAdapter playlistsAdapter;
+    private ConstraintLayout layoutPlaylistsRecycler;
+    private LinearLayout layoutPlaylistsManagement;
+    private  TextView textPlaylistsManagement;
+    private ImageButton playlistsManagement;
+    private ArrayList<Song> songs;
+    private Boolean statePlaylistRecycler = false;
+    private View view;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -79,7 +80,8 @@ public class MusicsFragment extends Fragment {
 
         mSettings = getContext().getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
 
-        songs = new ArrayList<Song>();
+        songs = new ArrayList<>();
+
         recyclerSongs = view.findViewById(R.id.songsRecycler);
         recyclerPlaylists = view.findViewById(R.id.playlistsRecycler);
         layoutPlaylistsRecycler = view.findViewById(R.id.layoutPlaylistsRecycler);
@@ -119,7 +121,7 @@ public class MusicsFragment extends Fragment {
         showSongs();
         return view;
     }
-    boolean checkPermission(){
+    private boolean checkPermission(){
         int result = ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE);
 
         if(result == PackageManager.PERMISSION_GRANTED){
@@ -128,21 +130,22 @@ public class MusicsFragment extends Fragment {
             return false;
         }
     }
-    void requestPermissionNew(){
+    private void requestPermissionNew(){
         Uri uri = Uri.parse("package:com.example.musicwithfriends");
         Intent intentRequest = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
         requestPermissionLauncherNew.launch(intentRequest);
 
     }
-    void requestPermissionOld(){
+    private void requestPermissionOld(){
         requestPermissionLauncherOld.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
     }
 
-    void searchForSongs(){
+    private void searchForSongs(){
         String[] projection = new String[]{
                 MediaStore.Audio.Media.DATA,
                 MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.ARTIST
+                MediaStore.Audio.Media.ARTIST,
+                MediaStore.Audio.Media.GENRE
         };
 
         String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
@@ -159,7 +162,8 @@ public class MusicsFragment extends Fragment {
             Song song = new Song(
                     cursor.getString(0),
                     cursor.getString(1),
-                    cursor.getString(2)
+                    cursor.getString(2),
+                    cursor.getString(3)
             );
 
             if(new File(song.getPath()).exists()){
@@ -168,7 +172,7 @@ public class MusicsFragment extends Fragment {
         }
         cursor.close();
     }
-    ArrayList<Playlist> savingSongs(){
+    private ArrayList<Playlist> savingSongs(){
         Gson gson = new Gson();
         Type typeArrayPlaylist = new TypeToken<ArrayList<Playlist>>(){}.getType();
         String json = mSettings.getString("Playlists", "");
@@ -190,35 +194,35 @@ public class MusicsFragment extends Fragment {
 
         return playlists;
     }
-    void showSongs(){
+    private void showSongs(){
 
         searchForSongs();
 
         if(songs.size() == 0){
             Toast.makeText(getContext(), "Cписок музыки пуст", Toast.LENGTH_SHORT).show();
-        } else {
-            View.OnClickListener onClickListener = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    hideRecyclerPlaylist();
-                }
-            };
-
-            playlistsAdapter =
-                    new PlaylistsAdapter(getContext(), getActivity(), savingSongs(), recyclerPlaylists, recyclerSongs, onClickListener);
-
-            LinearLayoutManager linearLayoutManager =
-                    new LinearLayoutManager(getContext(),  LinearLayoutManager.VERTICAL, false);
-
-            recyclerPlaylists.setLayoutManager(linearLayoutManager);
-
-            recyclerPlaylists.setAdapter(playlistsAdapter);
-
-            recyclerPlaylists.suppressLayout(true);
         }
+        View.OnClickListener onClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideRecyclerPlaylist();
+            }
+        };
+
+        playlistsAdapter =
+                new PlaylistsAdapter(getContext(), (MainActivity) getActivity(), savingSongs(), recyclerPlaylists, recyclerSongs, onClickListener);
+
+        LinearLayoutManager linearLayoutManager =
+                new LinearLayoutManager(getContext(),  LinearLayoutManager.VERTICAL, false);
+
+        recyclerPlaylists.setLayoutManager(linearLayoutManager);
+
+        recyclerPlaylists.setAdapter(playlistsAdapter);
+
+        recyclerPlaylists.suppressLayout(true);
+
     }
 
-    void changeRecyclerPlaylist(){
+    private void changeRecyclerPlaylist(){
 
         ValueAnimator anim;
         int playlistsRecyclerHeight = (int) getResources().getDimension(R.dimen.get_playlists_recycler_height);
@@ -227,12 +231,12 @@ public class MusicsFragment extends Fragment {
         if(!statePlaylistRecycler){
             anim = ValueAnimator.ofInt( playlistsRecyclerHeight, 700);
             textPlaylistsManagement.setText("Скрыть плейлисты");
-            playlistsManagement.setImageResource(R.drawable.up_arrow);
+            playlistsManagement.setImageResource(R.drawable.arrow_up);
             statePlaylistRecycler = true;
         } else {
             anim = ValueAnimator.ofInt(recyclerPlaylists.getMeasuredHeight(), playlistsRecyclerHeight);
             textPlaylistsManagement.setText("Показать плейлисты");
-            playlistsManagement.setImageResource(R.drawable.down_arrow);
+            playlistsManagement.setImageResource(R.drawable.arrow_down);
             statePlaylistRecycler = false;
         }
 
@@ -262,13 +266,13 @@ public class MusicsFragment extends Fragment {
         anim.setDuration(250);
         anim.start();
     }
-    void hideRecyclerPlaylist(){
+    private void hideRecyclerPlaylist(){
         textPlaylistsManagement.setText("Показать плейлисты");
-        playlistsManagement.setImageResource(R.drawable.down_arrow);
+        playlistsManagement.setImageResource(R.drawable.arrow_down);
         statePlaylistRecycler = false;
     }
 
-    ActivityResultLauncher<String> requestPermissionLauncherOld =  registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
+    private ActivityResultLauncher<String> requestPermissionLauncherOld =  registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
         @Override
         public void onActivityResult(Boolean result) {
             if(result){
@@ -278,7 +282,7 @@ public class MusicsFragment extends Fragment {
             }
         }
     });
-    ActivityResultLauncher<Intent> requestPermissionLauncherNew = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+    private ActivityResultLauncher<Intent> requestPermissionLauncherNew = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
             @Override
             public void onActivityResult(ActivityResult result) {
                 checkingFileAccess(view);

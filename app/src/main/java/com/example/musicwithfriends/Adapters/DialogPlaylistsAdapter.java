@@ -34,6 +34,7 @@ public class DialogPlaylistsAdapter extends RecyclerView.Adapter<DialogPlaylists
     Dialog dialog, mainDialog;
     Song song;
     int positionPlaylist;
+
     public DialogPlaylistsAdapter(Context context, ArrayList<Playlist> playlists, PlaylistsAdapter playlistsAdapter,
                                   int positionPlaylist, Dialog dialog, Dialog mainDialog) {
         this.context = context;

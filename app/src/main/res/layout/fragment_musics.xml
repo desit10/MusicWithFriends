@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent"
         android:orientation="vertical"
         android:gravity="center"
-        android:background="@drawable/background_layout_playlists"
+        android:background="@drawable/bcg_layout_playlists"
         android:elevation="5dp">
 
         <androidx.recyclerview.widget.RecyclerView
@@ -51,7 +51,7 @@
                 android:id="@+id/playlistsManagement"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/down_arrow"
+                android:src="@drawable/arrow_down"
                 android:background="@color/transparent" />
 
         </LinearLayout>
@@ -63,22 +63,12 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
+        android:paddingTop="@dimen/get_padding_top"
         android:paddingBottom="@dimen/get_padding_bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layoutPlaylistsRecycler" />
-
-    <ProgressBar
-        android:id="@+id/progressBarNews"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:alpha="0"/>
-
+        app:layout_constraintTop_toTopOf="@+id/layoutPlaylistsRecycler" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

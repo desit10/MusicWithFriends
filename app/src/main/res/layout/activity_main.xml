@@ -57,7 +57,7 @@
                 android:background="@color/transparent"
                 app:itemActiveIndicatorStyle="@color/black"
                 app:itemIconSize="30dp"
-                app:itemIconTint="@drawable/bottom_nav_selector"
+                app:itemIconTint="@drawable/selector_bottom_nav"
                 app:itemPaddingTop="15dp"
                 app:itemRippleColor="@color/black"
                 app:menu="@menu/bottom_menu" />
@@ -68,7 +68,7 @@
             android:id="@+id/floatingActionButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/musics"
+            android:src="@drawable/btn_fragment_musics"
             app:backgroundTint="@color/bgcFabBtn"
             app:layout_anchor="@id/bottomAppBar"
             app:maxImageSize="40dp"

@@ -2,11 +2,9 @@ package com.example.musicwithfriends.Adapters;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -14,10 +12,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
-import android.provider.MediaStore;
-import android.provider.Settings;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,11 +57,15 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
     FragmentActivity mainActivity;
     ArrayList<Song> songs;
     CurrentSongsAdapter currentSongsAdapter;
-    RecyclerView recyclerCurrentSong;
+    RecyclerView recyclerCurrentSong, recyclerSongs;
     SnapHelperOneByOne snapHelperOneByOne;
     Boolean stateAdapter;
     PlaylistsAdapter playlistsAdapter;
     int positionPlaylist;
+    Bitmap bitmap;
+    int selectedPosition = 0;
+    ViewHolder oldSelectedHolder;
+
 
     public SongsAdapter(Context context, FragmentActivity mainActivity, ArrayList<Song> songs, Boolean stateAdapter) {
         this.context = context;
@@ -96,10 +95,17 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
         holder.songTitle.setText(song.getTitle());
         holder.songArtist.setText(song.getArtist());
 
+        if(position == selectedPosition){
+            holder.frameSong.setSelected(true);
+            oldSelectedHolder = holder;
+        } else {
+            holder.frameSong.setSelected(false);
+        }
         //При нажатии на песню в списке передаём позицию в список текущих песен
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                selectingSong(position);
                 selectingTheCurrentSong(position);
             }
         });
@@ -110,6 +116,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
                 showBottomDialog(getPositionPlaylist(), position);
             }
         });
+
     }
 
     @Override
@@ -120,6 +127,10 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
+
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setItemViewCacheSize(getItemCount());
+        recyclerSongs = recyclerView;
 
         //При появлении списка на экране создаём список текущих песен
         creatingRecyclerCurrentSong();
@@ -133,19 +144,20 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
 
             //Если обложки нет, то подставляем альтернативную абложку
             if(data == null){
-                holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
+                holder.songAlbum.setImageResource(R.drawable.img_alternativ_song_album);
             } else {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
                 holder.songAlbum.setImageBitmap(bitmap);
             }
         } else {
-            holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
+            holder.songAlbum.setImageResource(R.drawable.img_alternativ_song_album);
         }
     }
 
     void creatingRecyclerCurrentSong(){
         recyclerCurrentSong = mainActivity.findViewById(R.id.recyclerCurrentSong);
-        currentSongsAdapter = new CurrentSongsAdapter(context, recyclerCurrentSong, songs);
+        currentSongsAdapter = new CurrentSongsAdapter(context, songs, this);
+
         if(stateAdapter){
             recyclerCurrentSong.setTranslationX(-1000f);
 
@@ -165,7 +177,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
     void selectingTheCurrentSong(int position) {
         currentSongsAdapter = null;
 
-        currentSongsAdapter = new CurrentSongsAdapter(context, recyclerCurrentSong, songs);
+        currentSongsAdapter = new CurrentSongsAdapter(context, songs, this);
         recyclerCurrentSong.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
 
         recyclerCurrentSong.setOnFlingListener(null);
@@ -178,6 +190,24 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
         recyclerCurrentSong.scrollToPosition(position);
     }
 
+    public void selectingSong(int position) {
+        selectedPosition = position;
+        ViewHolder holder = (ViewHolder) recyclerSongs.findViewHolderForAdapterPosition(selectedPosition);
+        if(holder != null){
+            holder.frameSong.setSelected(true);
+            if(oldSelectedHolder == null) {
+                oldSelectedHolder = holder;
+            } else {
+                if(selectedPosition != oldSelectedHolder.getAbsoluteAdapterPosition()) {
+                    oldSelectedHolder.frameSong.setSelected(false);
+                    notifyItemChanged(oldSelectedHolder.getAbsoluteAdapterPosition());
+                    oldSelectedHolder = holder;
+                }
+            }
+        }
+        recyclerSongs.smoothScrollToPosition(selectedPosition);
+    }
+
     public void showBottomDialog(int positionPlaylist, int positionSong) {
         Dialog mainDialog = new Dialog(context);
         mainDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -185,7 +215,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
 
         mainDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
         mainDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        mainDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+        mainDialog.getWindow().getAttributes().windowAnimations = R.style.AnimationContextMenu;
         mainDialog.getWindow().setGravity(Gravity.BOTTOM);
 
         LinearLayout layoutAddSongPlaylist = mainDialog.findViewById(R.id.layoutAddSongPlaylist);
@@ -213,7 +243,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
                     dialog.setContentView(R.layout.dialog_add_song_in_playlist);
                     dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                     dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-                    dialog.getWindow().getAttributes().windowAnimations = R.style.DialogPlaylistAnimation;
+                    dialog.getWindow().getAttributes().windowAnimations = R.style.AnimationDialog;
 
                     RecyclerView playlistsRecycler = dialog.findViewById(R.id.playlistsRecycler);
                     LinearLayoutManager layoutManager = new LinearLayoutManager(context, RecyclerView.VERTICAL, false);
@@ -366,6 +396,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
                 }
             }
         };
+
         layoutAddSongPlaylist.setOnClickListener(onClickListener);
         layoutShare.setOnClickListener(onClickListener);
         layoutDeleteSongPlaylist.setOnClickListener(onClickListener);
@@ -391,7 +422,7 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
         this.positionPlaylist = positionPlaylist;
     }
 
-    public  class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         FrameLayout frameSong;
         ImageView songAlbum;
@@ -408,6 +439,17 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsAdapter.ViewHolder>{
 
             songTitle = itemView.findViewById(R.id.songTitle);
             songArtist = itemView.findViewById(R.id.songArtist);
+
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (getAbsoluteAdapterPosition() == RecyclerView.NO_POSITION) return;
+
+            notifyItemChanged(selectedPosition);
+            selectedPosition = getAbsoluteAdapterPosition();
+            notifyItemChanged(selectedPosition);
         }
     }
 }

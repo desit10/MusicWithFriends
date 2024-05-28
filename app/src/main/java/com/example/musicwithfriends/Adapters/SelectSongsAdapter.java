@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,23 +25,25 @@ import com.example.musicwithfriends.R;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 @UnstableApi
-public class DialogSongsAdapter extends RecyclerView.Adapter<DialogSongsAdapter.ViewHolder>{
+public class SelectSongsAdapter extends RecyclerView.Adapter<SelectSongsAdapter.ViewHolder>{
 
     public static final String APP_PREFERENCES = "mysettings";
     private SharedPreferences mSettings;
     Context context;
     ArrayList<Song> songs;
-    ArrayList<Song> roomSong;
+    ArrayList<Song> roomSongs;
+    private SparseBooleanArray selectedItems = new SparseBooleanArray();
+    int selectedPosition = 0;
 
-    public DialogSongsAdapter(Context context) {
+
+    public SelectSongsAdapter(Context context) {
         this.context = context;
 
-        roomSong = new ArrayList<>();
+        roomSongs = new ArrayList<>();
         mSettings = context.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
 
         Gson gson;
@@ -61,42 +64,43 @@ public class DialogSongsAdapter extends RecyclerView.Adapter<DialogSongsAdapter.
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_song, parent, false);
 
-        return new DialogSongsAdapter.ViewHolder(view);
+        return new SelectSongsAdapter.ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
-
         Song song = songs.get(position);
 
         //Создание обложки песни
-        if(new File(song.getPath()).exists()){
-            android.media.MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-            mmr.setDataSource(song.getPath());
-            byte[] data = mmr.getEmbeddedPicture();
+        android.media.MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        mmr.setDataSource(song.getPath());
+        byte[] data = mmr.getEmbeddedPicture();
 
-            //Если обложки нет, то подставляем альтернативную абложку
-            if(data == null){
-                holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
-            } else {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                holder.songAlbum.setImageBitmap(bitmap);
-            }
+        //Если обложки нет, то подставляем альтернативную абложку
+        if(data == null){
+            holder.songAlbum.setImageResource(R.drawable.img_alternativ_song_album);
         } else {
-            holder.songAlbum.setImageResource(R.drawable.alternativ_song_album);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+            holder.songAlbum.setImageBitmap(bitmap);
         }
 
         holder.songTitle.setText(song.getTitle());
         holder.songArtist.setText(song.getArtist());
 
+        holder.contextMenu.setVisibility(View.GONE);
+
+        holder.frameSong.setSelected(selectedItems.get(position, false));
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(roomSong.remove(song)){
-                    holder.frameSong.setBackgroundResource(R.color.smoky_white);
+                if(roomSongs.remove(song)){
+                    selectedItems.delete(holder.getAbsoluteAdapterPosition());
+                    holder.frameSong.setSelected(false);
                 } else {
-                    holder.frameSong.setBackgroundResource(R.color.blue);
-                    roomSong.add(song);
+                    selectedItems.put(holder.getAbsoluteAdapterPosition(), true);
+                    holder.frameSong.setSelected(true);
+                    roomSongs.add(song);
                 }
             }
         });
@@ -107,16 +111,24 @@ public class DialogSongsAdapter extends RecyclerView.Adapter<DialogSongsAdapter.
         return songs.size();
     }
 
-    public ArrayList<Song> getRoomSong() {
-        return roomSong;
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setItemViewCacheSize(getItemCount());
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public ArrayList<Song> getRoomSongs() {
+        return roomSongs;
+    }
 
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         FrameLayout frameSong;
         ImageView songAlbum;
         ImageButton contextMenu;
         TextView songTitle, songArtist;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -128,6 +140,15 @@ public class DialogSongsAdapter extends RecyclerView.Adapter<DialogSongsAdapter.
 
             songTitle = itemView.findViewById(R.id.songTitle);
             songArtist = itemView.findViewById(R.id.songArtist);
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (getAbsoluteAdapterPosition() == RecyclerView.NO_POSITION) return;
+
+            notifyItemChanged(selectedPosition);
+            selectedPosition = getAbsoluteAdapterPosition();
+            notifyItemChanged(selectedPosition);
         }
     }
 }

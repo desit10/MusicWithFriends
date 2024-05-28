@@ -6,10 +6,7 @@
     android:layout_height="match_parent"
     android:paddingTop="10dp">
 
-    <androidx.media3.ui.PlayerView
-        android:id="@+id/player"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
